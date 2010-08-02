@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xmlns:ivy="antlib:org.apache.ivy.ant"
+  name="RallyTool"
+	default="compile">
+
+	<property name="package.name" value="standup.rally"/>
+
+	<property name="emma.dir" value="/Users/daveshawley/lib"/>
+
+	<!--
+		The following properties are top-level directories that contain the source, libraries,
+		and tools that make up this package.  The separation between lib.dir and ivy.lib.dir
+		is an artifact of using Apache Ivy for external library dependencies.  Everything in
+		ivy.lib.dir is downloaded by Ivy.  Lib.dir contains libraries that are not currently
+		available using Ivy so we are forced to bundle them statically.
+	-->
+	<property name="src.dir" location="src"/>
+	<property name="config.dir" location="configs"/>
+	<property name="lib.dir" location="local-lib"/>
+	<property name="ivy.lib.dir" location="ext-lib"/>
+	<property name="tools.dir" location="tools"/>
+	<property name="docs.dir" location="docs"/>
+	<property name="schemas.dir" value="${docs.dir}/schemas"/>
+	<property name="generated.src.dir" location="generated-src"/>
+
+	<!--
+		This set of properties controls the locations of intermediate files.  These are used
+		to store compiled classes and stage other intermediates as necessary.  For example,
+		the jar.dir and war.dir directories are used to stage directory structures required
+		by the <jar> and <war> tasks.
+		
+		Currently all of the intermediates are located under build.dir.  The `clean' target
+		removes all intermediate files by simply removing this directory.  If any intermediate
+		files are introduced outside of build.dir, then make sure that the `clean' target is
+		updated appropriately.
+	-->
+	<property name="build.dir" location="build"/>
+	<property name="classes.dir" value="${build.dir}/classes"/>
+	<property name="jar.dir" value="${build.dir}/jar"/>
+	<property name="war.dir" value="${build.dir}/war"/>
+	<property name="coverage.dir" value="${build.dir}/coverage"/>
+	<!-- This is not defined here, read the comments above the "emma" target -->
+	<!-- property name="instr.classes.dir" value="${build.dir}/instr"/ -->
+
+	<!--
+		This set of properties controls the locations of the artifacts constructed by this
+		package.
+		
+		Currently all of the output artifacts are contained in output.dir.  The `real-clean'
+		target removes all generated files by deleting this directory.  If an output file is
+		added outside of this tree, then make sure that `real-clean' is updated to remove
+		the file or files.
+	-->
+	<property name="output.dir" location="bin"/>
+	<property name="jar.path" value="${output.dir}/${ant.project.name}.jar"/>
+	<property name="war.path" value="${output.dir}/${ant.project.name}.war"/>
+	<property name="javadoc.dir" value="${docs.dir}/api"/>
+	<property name="report.dir" value="${docs.dir}/reports"/>
+	<property name="junit.report.dir" value="${report.dir}/test"/>
+	<property name="coverage.report.dir" value="${report.dir}/coverage"/>
+
+
+	<path id="emma.path">
+		<pathelement location="${emma.dir}/emma.jar"/>
+		<pathelement location="${emma.dir}/emma_ant.jar"/>
+	</path>
+
+	<path id="default.classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar"/>
+		<fileset dir="${ivy.lib.dir}" includes="**/*.jar"/>
+	</path>
+
+	<path id="build.classpath">
+		<path refid="default.classpath"/>
+		<fileset dir="${tools.dir}" includes="**/*.jar"/>
+	</path>
+
+	<path id="run.classpath">
+		<path refid="default.classpath"/>
+		<fileset file="${output.dir}/${ant.project.name}.jar"/>
+	</path>
+
+
+	<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask">
+		<classpath refid="build.classpath"/>
+	</taskdef>
+	<taskdef name="eclipse" classname="prantl.ant.eclipse.EclipseTask">
+		<classpath refid="build.classpath"/>
+	</taskdef>
+	<taskdef resource="emma_ant.properties" classpathref="emma.path"/>
+
+
+	<target name="update-ivy"
+		description="===> retrieve dependencies">
+		<ivy:retrieve type="jar" sync="true"/>
+	</target>
+
+	<target name="xml-sources"
+		description="===> generate JAXB sources from the schemas">
+		<mkdir dir="${generated.src.dir}"/>
+		<xjc schema="${schemas.dir}/rally-1.17.xsd" target="2.0" removeOldOutput="true"
+			destdir="${generated.src.dir}" package="com.rallydev.xml">
+			<depends dir="${schemas.dir}" includes="rally-1.17.xsd"/>
+			<produces dir="${generated.src.dir}/com/rallydev" includes="**/*.java"/>
+		</xjc>
+	</target>
+
+	<target name="bootstrap"
+		description="===> update external dependencies, compile schemas, etc."
+		depends="update-ivy,xml-sources,eclipse">
+	</target>
+
+	<target name="api-docs"
+		description="===> generate API documentation">
+		<mkdir dir="${javadoc.dir}"/>
+		<javadoc
+			sourcepath="${src.dir}" destdir="${javadoc.dir}"
+			private="true">
+			<classpath refid="build.classpath"/>
+			<group title="Entity Model" packages="${package.name}.model"/>
+			<group title="Representations" packages="${package.name}.xml"/>
+			<group title="Tests" packages="tests:tests.*"/>
+			<link href="http://java.sun.com/javase/6/docs/api/"/>
+			<link href="http://java.sun.com/javaee/6/docs/api/"/>
+		</javadoc>
+	</target>
+
+	<target name="eclipse"
+		description="===> generate an Eclipse project">
+		<mkdir dir="${generated.src.dir}"/>
+		<mkdir dir="${ivy.lib.dir}"/>
+		<eclipse mode="java" updatealways="true">
+			<project name="${ant.project.name}"/>
+			<classpath>
+				<output path="${build.dir}"/>
+				<source path="${src.dir}"/>
+				<source path="${generated.src.dir}"/>
+				<library pathref="default.classpath"/>
+				<library path="${docs.dir}"/>
+			</classpath>
+		</eclipse>
+	</target>
+
+	<target name="compile"
+		description="===> compile all classes"
+		depends="xml-sources">
+		<mkdir dir="${ivy.lib.dir}"/>
+		<mkdir dir="${classes.dir}"/>
+		<javac target="1.6" debug="true"
+			destdir="${classes.dir}" includeantruntime="false">
+			<src path="${src.dir}"/>
+			<src path="${generated.src.dir}"/>
+			<classpath refid="build.classpath"/>
+		</javac>
+	</target>
+
+	<target name="jar"
+		description="===> build a JAR of all classes"
+		depends="compile">
+		<mkdir dir="${jar.dir}"/>
+		<jar destfile="${jar.path}" basedir="${jar.dir}">
+			<fileset dir="${classes.dir}" excludes="**/*.swp"/>
+			<fileset dir="${jar.dir}" excludes="**/*.swp"/>
+			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
+		</jar>
+	</target>
+
+	<target name="clean"
+		description="===> removes intermediate generated files">
+		<delete dir="${build.dir}"/>
+		<delete file="coverage.ec"/>
+	</target>
+
+	<target name="real-clean"
+		description="===> remove all generated files"
+		depends="clean">
+		<delete dir="${output.dir}"/>
+		<delete dir="${generated.src.dir}"/>
+		<delete dir="${javadoc.dir}"/>
+		<delete dir="${report.dir}"/>
+		<delete file="${basedir}/.project"/>
+		<delete file="${basedir}/.classpath"/>
+		<delete dir="${basedir}/.settings"/>
+	</target>
+
+	<target name="dist-clean"
+		description="===> remove all non-repository files"
+		depends="real-clean">
+		<delete dir="${ivy.lib.dir}"/>
+		<mkdir dir="${ivy.lib.dir}"/>
+	</target>
+
+	<target name="test"
+		description="===> run the test classes"
+		depends="jar">
+		<mkdir dir="${junit.report.dir}"/>
+		
+		<emma enabled="${emma.enabled}">
+			<instr destdir="${instr.classes.dir}/standup" mode="copy"
+				metadatafile="${coverage.dir}/metadata.emma"
+				merge="true">
+				<instrpath>
+					<pathelement location="${classes.dir}/standup"/>
+				</instrpath>
+			</instr>
+		</emma>
+		
+		<junit printsummary="true" fork="true">
+			<formatter type="plain"/>
+			<formatter type="xml"/>
+			<classpath>
+				<pathelement location="${instr.classes.dir}"/>
+				<path refid="run.classpath"/>
+				<path refid="emma.path"/>
+			</classpath>
+			<batchtest fork="yes" todir="${junit.report.dir}">
+				<fileset dir="${src.dir}" includes="tests/**/*Test.java"/>
+			</batchtest>
+			<jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma"/>
+			<jvmarg value="-Demma.coverage.out.merge=true"/>
+		</junit>
+		
+		<junitreport todir="${junit.report.dir}">
+			<fileset dir="${junit.report.dir}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+			<report format="frames" todir="${junit.report.dir}/html"/>
+		</junitreport>
+		
+		<emma enabled="${emma.enabled}">
+			<report sourcepath="${src.dir}">
+				<fileset dir="${coverage.dir}">
+					<include name="*.emma"/>
+				</fileset>
+				<txt outfile="${coverage.report.dir}/coverage.txt"/>
+				<html outfile="${coverage.report.dir}/coverage.html"/>
+			</report>
+		</emma>
+	</target>
+
+
+	<!--
+		The following is a twisted but quite functional way of incorporating Emma
+		into the overall process.
+	-->
+	<target name="emma"
+		description="---> enable Emma by mixing this in">
+		<mkdir dir="${coverage.dir}"/>
+		<mkdir dir="${coverage.report.dir}"/>
+		<property name="emma.enabled" value="true"/>
+		<property name="instr.classes.dir" value="${build.dir}/instr"/>
+	</target>
+
+</project>
+
+<!-- vim: set tabstop=2 shiftwidth=2 columns=110: -->
+

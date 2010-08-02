@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<ivy-module version="2.0">
+	<info organisation="com.schange" module="rally-tool"/>
+
+	<dependencies>
+
+		<dependency
+			org="org.junit"
+			name="junit"
+			rev="latest.release"/>
+
+		<dependency
+			org="org.apache.log4j"
+			name="log4j"
+			rev="1.2.+"
+			conf="default"/>
+
+		<dependency
+			org="org.apache.commons"
+			name="commons-lang"
+			rev="[2.4,)"/>
+
+		<dependency
+			org="org.apache.httpcomponents"
+			name="httpcore"
+			rev="4.0.+"/>
+
+		<dependency
+			org="org.apache.httpcomponents"
+			name="httpclient"
+			rev="4.0.+"/>
+
+		<dependency
+			org="org.apache.commons"
+			name="commons-collections"
+			rev="3.+"/>
+
+		<!-- dependency
+			org="com.vladium"
+			name="emma"
+			rev="2.0.+"/ -->
+
+		<dependency
+			org="org.easymock"
+			name="easymock"
+			rev="2.+"/>
+
+	</dependencies>
+</ivy-module>
+

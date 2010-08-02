@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<ivysettings>
+
+	<resolvers>
+		<chain>
+
+			<!-- First try the Maven 2 public repository -->
+			<ibiblio name="ibiblio" m2compatible="true" usepoms="true"/>
+
+			<url name="download.java.net" m2compatible="true">
+				<artifact pattern="http://download.java.net/maven/2/[organization]/[module]/[revision]/[artifact]-[revision].[ext]"/>
+			</url>
+
+			<!-- Next fall back to the Google Code repository -->
+			<packager name="ivyroundup"
+				buildRoot="${user.home}/.ivy2/packager/build"
+				resourceCache="${user.home}/.ivy2/packager/cache">
+				<ivy pattern="http://ivyroundup.googlecode.com/svn/trunk/repo/modules/[organisation]/[module]/[revision]/ivy.xml"/>
+				<artifact pattern="http://ivyroundup.googlecode.com/svn/trunk/repo/modules/[organisation]/[module]/[revision]/packager.xml"/>
+			</packager>
+
+			<!-- This one is a failsafe for Eclipse Link stuff since most of the other
+			     repos do not carry them. -->
+			<url name="eclipse-link">
+				<artifact pattern="http://www.eclipse.org/downloads/download.php?r=1&amp;nf=1&amp;file=/rt/eclipselink/maven.repo/[organisation]/[module]/[revision]/[artifact]-[revision].[ext]"/>
+			</url>
+		</chain>
+	</resolvers>
+
+	<modules>
+		<module
+			organisation="org.eclipse.persistence"
+			name=".*"
+			resolver="eclipse-link"/>
+	</modules>
+
+</ivysettings>

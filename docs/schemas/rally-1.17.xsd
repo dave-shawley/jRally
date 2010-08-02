@@ -1,0 +1,987 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:complexType name="WSObject">
+    <xsd:attribute name="ref" type="xsd:string" />
+    <xsd:attribute name="objectVersion" type="xsd:long" />
+    <xsd:attribute name="type" type="xsd:string" />
+    <xsd:attribute name="refObjectName" type="xsd:string" />
+    <xsd:attribute name="rallyAPIMajor" type="xsd:long" />
+    <xsd:attribute name="rallyAPIMinor" type="xsd:long" />
+  </xsd:complexType>
+  <xsd:complexType name="OperationResultType">
+    <xsd:complexContent>
+      <xsd:extension base="WSObject">
+        <xsd:sequence>
+          <xsd:element name="Errors" type="OperationResultErrorsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Warnings" type="OperationResultWarningsType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="OperationResult" type="OperationResultType" />
+  <xsd:complexType name="OperationResultErrorsType">
+    <xsd:sequence>
+      <xsd:element name="OperationResultError" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="OperationResultWarningsType">
+    <xsd:sequence>
+      <xsd:element name="OperationResultWarning" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="WebLink">
+    <xsd:sequence>
+      <xsd:element name="LinkID" type="xsd:string" />
+      <xsd:element name="DisplayString" type="xsd:string" minOccurs="0" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="QueryResultType">
+    <xsd:complexContent>
+      <xsd:extension base="OperationResultType">
+        <xsd:sequence>
+          <xsd:element name="TotalResultCount" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="StartIndex" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="PageSize" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Results" type="QueryResultResultsType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="QueryResult" type="QueryResultType" />
+  <xsd:complexType name="QueryResultResultsType">
+    <xsd:sequence>
+      <xsd:element name="Object" type="DomainObjectType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="CreateResultType">
+    <xsd:complexContent>
+      <xsd:extension base="OperationResultType">
+        <xsd:sequence>
+          <xsd:element name="Object" type="DomainObjectType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="CreateResult" type="CreateResultType" />
+  <xsd:element name="AllowedAttributeValue" type="AllowedAttributeValueType" />
+  <xsd:complexType name="AllowedAttributeValueType">
+    <xsd:complexContent>
+      <xsd:extension base="PersistableObjectType">
+        <xsd:sequence>
+          <xsd:element name="StringValue" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="AllowedQueryOperator" type="AllowedQueryOperatorType" />
+  <xsd:complexType name="AllowedQueryOperatorType">
+    <xsd:complexContent>
+      <xsd:extension base="PersistableObjectType">
+        <xsd:sequence>
+          <xsd:element name="OperatorName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Artifact" type="ArtifactType" />
+  <xsd:complexType name="ArtifactDiscussionType">
+    <xsd:sequence>
+      <xsd:element name="ConversationPost" type="ConversationPostType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ArtifactTagsType">
+    <xsd:sequence>
+      <xsd:element name="Tag" type="TagType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ArtifactType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Description" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Discussion" type="ArtifactDiscussionType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="FormattedID" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="LastUpdateDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Notes" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Owner" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Project" type="ProjectType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="RevisionHistory" type="RevisionHistoryType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Tags" type="ArtifactTagsType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="ArtifactNotification" type="ArtifactNotificationType" />
+  <xsd:complexType name="ArtifactNotificationType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="ClassName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Description" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ID" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="IDPrefix" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="IDSuffix" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Project" type="ProjectType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="SubjectOID" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="UserName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Attachment" type="AttachmentType" />
+  <xsd:complexType name="AttachmentType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Content" type="AttachmentContentType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ContentType" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Description" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Size" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="User" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="AttachmentContent" type="AttachmentContentType" />
+  <xsd:complexType name="AttachmentContentType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Content" type="xsd:base64Binary" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="AttributeDefinition" type="AttributeDefinitionType" />
+  <xsd:complexType name="AttributeDefinitionAllowedQueryOperatorsType">
+    <xsd:sequence>
+      <xsd:element name="AllowedQueryOperator" type="AllowedQueryOperatorType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="AttributeDefinitionAllowedValuesType">
+    <xsd:sequence>
+      <xsd:element name="AllowedAttributeValue" type="AllowedAttributeValueType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="AttributeDefinitionType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="AllowedQueryOperators" type="AttributeDefinitionAllowedQueryOperatorsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="AllowedValueType" type="TypeDefinitionType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="AllowedValues" type="AttributeDefinitionAllowedValuesType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="AttributeType" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Constrained" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Custom" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ElementName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Filterable" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Hidden" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="MaxFractionalDigits" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="MaxLength" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Note" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Owned" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ReadOnly" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Required" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="SchemaType" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Blocker" type="BlockerType" />
+  <xsd:complexType name="BlockerType">
+    <xsd:complexContent>
+      <xsd:extension base="DomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="BlockedBy" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="WorkProduct" type="ArtifactType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Build" type="BuildType" />
+  <xsd:complexType name="BuildType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="BuildDefinition" type="BuildDefinitionType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Duration" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Label" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Message" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Status" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="BuildDefinition" type="BuildDefinitionType" />
+  <xsd:complexType name="BuildDefinitionBuildsType">
+    <xsd:sequence>
+      <xsd:element name="Build" type="BuildType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="BuildDefinitionType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Builds" type="BuildDefinitionBuildsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Description" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Project" type="ProjectType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="State" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="BuildMetric" type="BuildMetricType" />
+  <xsd:complexType name="BuildMetricType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType" />
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="BuildMetricDefinition" type="BuildMetricDefinitionType" />
+  <xsd:complexType name="BuildMetricDefinitionType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType" />
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="ConversationPost" type="ConversationPostType" />
+  <xsd:complexType name="ConversationPostType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Artifact" type="ArtifactType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="PostNumber" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Text" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="UserName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="CumulativeFlowData" type="CumulativeFlowDataType" />
+  <xsd:complexType name="CumulativeFlowDataType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="CardCount" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="CardEstimateTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="CardState" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="CardToDoTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskEstimateTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Defect" type="DefectType" />
+  <xsd:complexType name="DefectAttachmentsType">
+    <xsd:sequence>
+      <xsd:element name="Attachment" type="AttachmentType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="DefectDuplicatesType">
+    <xsd:sequence>
+      <xsd:element name="Defect" type="DefectType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="DefectTasksType">
+    <xsd:sequence>
+      <xsd:element name="Task" type="TaskType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="DefectType">
+    <xsd:complexContent>
+      <xsd:extension base="ArtifactType">
+        <xsd:sequence>
+          <xsd:element name="AcceptedDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="AffectsDoc" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Attachments" type="DefectAttachmentsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Blocked" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Blocker" type="BlockerType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ClosedDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Duplicates" type="DefectDuplicatesType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Environment" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="FixedInBuild" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="FoundInBuild" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Iteration" type="IterationType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="OpenedDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Package" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="PlanEstimate" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Priority" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Rank" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Release" type="ReleaseType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ReleaseNote" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Requirement" type="RequirementType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Resolution" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="SalesforceCaseID" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="SalesforceCaseNumber" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ScheduleState" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Severity" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="State" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="SubmittedBy" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TargetBuild" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TargetDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskActualTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskEstimateTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskRemainingTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Tasks" type="DefectTasksType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TestCase" type="TestCaseType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TestCaseResult" type="TestCaseResultType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="VerifiedInBuild" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Jira" type="WebLink" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="KanbanState" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="DefectSuite" type="DefectSuiteType" />
+  <xsd:complexType name="DefectSuiteAttachmentsType">
+    <xsd:sequence>
+      <xsd:element name="Attachment" type="AttachmentType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="DefectSuiteDefectsType">
+    <xsd:sequence>
+      <xsd:element name="Defect" type="DefectType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="DefectSuiteTasksType">
+    <xsd:sequence>
+      <xsd:element name="Task" type="TaskType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="DefectSuiteType">
+    <xsd:complexContent>
+      <xsd:extension base="ArtifactType">
+        <xsd:sequence>
+          <xsd:element name="AcceptedDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Attachments" type="DefectSuiteAttachmentsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Blocked" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Blocker" type="BlockerType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Defects" type="DefectSuiteDefectsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Iteration" type="IterationType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Package" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="PlanEstimate" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Rank" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Release" type="ReleaseType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ScheduleState" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskActualTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskEstimateTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskRemainingTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Tasks" type="DefectSuiteTasksType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="DomainObject" type="DomainObjectType" />
+  <xsd:complexType name="DomainObjectType">
+    <xsd:complexContent>
+      <xsd:extension base="PersistableObjectType">
+        <xsd:sequence>
+          <xsd:element name="Subscription" type="SubscriptionType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="HierarchicalRequirement" type="HierarchicalRequirementType" />
+  <xsd:complexType name="HierarchicalRequirementChildrenType">
+    <xsd:sequence>
+      <xsd:element name="HierarchicalRequirement" type="HierarchicalRequirementType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="HierarchicalRequirementDefectsType">
+    <xsd:sequence>
+      <xsd:element name="Defect" type="DefectType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="HierarchicalRequirementPredecessorsType">
+    <xsd:sequence>
+      <xsd:element name="HierarchicalRequirement" type="HierarchicalRequirementType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="HierarchicalRequirementSuccessorsType">
+    <xsd:sequence>
+      <xsd:element name="HierarchicalRequirement" type="HierarchicalRequirementType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="HierarchicalRequirementTasksType">
+    <xsd:sequence>
+      <xsd:element name="Task" type="TaskType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="HierarchicalRequirementTestCasesType">
+    <xsd:sequence>
+      <xsd:element name="TestCase" type="TestCaseType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="HierarchicalRequirementType">
+    <xsd:complexContent>
+      <xsd:extension base="RequirementType">
+        <xsd:sequence>
+          <xsd:element name="AcceptedDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Blocked" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Blocker" type="BlockerType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Children" type="HierarchicalRequirementChildrenType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Defects" type="HierarchicalRequirementDefectsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Iteration" type="IterationType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Parent" type="HierarchicalRequirementType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="PlanEstimate" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Predecessors" type="HierarchicalRequirementPredecessorsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Rank" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Release" type="ReleaseType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ScheduleState" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Successors" type="HierarchicalRequirementSuccessorsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskActualTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskEstimateTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskRemainingTotal" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Tasks" type="HierarchicalRequirementTasksType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TestCases" type="HierarchicalRequirementTestCasesType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="KanbanState" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Iteration" type="IterationType" />
+  <xsd:complexType name="IterationUserIterationCapacitiesType">
+    <xsd:sequence>
+      <xsd:element name="UserIterationCapacity" type="UserIterationCapacityType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="IterationType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="EndDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Notes" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Project" type="ProjectType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Resources" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="RevisionHistory" type="RevisionHistoryType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="StartDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="State" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Theme" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="UserIterationCapacities" type="IterationUserIterationCapacitiesType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="IterationCumulativeFlowData" type="IterationCumulativeFlowDataType" />
+  <xsd:complexType name="IterationCumulativeFlowDataType">
+    <xsd:complexContent>
+      <xsd:extension base="CumulativeFlowDataType">
+        <xsd:sequence>
+          <xsd:element name="IterationObjectID" type="xsd:long" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="PersistableObject" type="PersistableObjectType" />
+  <xsd:complexType name="PersistableObjectType">
+    <xsd:complexContent>
+      <xsd:extension base="WSObject">
+        <xsd:sequence>
+          <xsd:element name="CreationDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ObjectID" type="xsd:long" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Program" type="ProgramType" />
+  <xsd:complexType name="ProgramReleasesType">
+    <xsd:sequence>
+      <xsd:element name="Release" type="ReleaseType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ProgramType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Description" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Owner" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Releases" type="ProgramReleasesType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Project" type="ProjectType" />
+  <xsd:complexType name="ProjectBuildDefinitionsType">
+    <xsd:sequence>
+      <xsd:element name="BuildDefinition" type="BuildDefinitionType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ProjectChildrenType">
+    <xsd:sequence>
+      <xsd:element name="Project" type="ProjectType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ProjectIterationsType">
+    <xsd:sequence>
+      <xsd:element name="Iteration" type="IterationType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ProjectReleasesType">
+    <xsd:sequence>
+      <xsd:element name="Release" type="ReleaseType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ProjectUsersType">
+    <xsd:sequence>
+      <xsd:element name="User" type="UserType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ProjectType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="BuildDefinitions" type="ProjectBuildDefinitionsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Children" type="ProjectChildrenType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Description" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Iterations" type="ProjectIterationsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Notes" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Owner" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Parent" type="ProjectType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Releases" type="ProjectReleasesType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="State" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Users" type="ProjectUsersType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="ProjectPermission" type="ProjectPermissionType" />
+  <xsd:complexType name="ProjectPermissionType">
+    <xsd:complexContent>
+      <xsd:extension base="UserPermissionType">
+        <xsd:sequence>
+          <xsd:element name="Project" type="ProjectType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Release" type="ReleaseType" />
+  <xsd:complexType name="ReleaseType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="GrossEstimateConversionRatio" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Notes" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Project" type="ProjectType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ReleaseDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ReleaseStartDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Resources" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="RevisionHistory" type="RevisionHistoryType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="State" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Theme" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Version" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="ReleaseCumulativeFlowData" type="ReleaseCumulativeFlowDataType" />
+  <xsd:complexType name="ReleaseCumulativeFlowDataType">
+    <xsd:complexContent>
+      <xsd:extension base="CumulativeFlowDataType">
+        <xsd:sequence>
+          <xsd:element name="ReleaseObjectID" type="xsd:long" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Requirement" type="RequirementType" />
+  <xsd:complexType name="RequirementAttachmentsType">
+    <xsd:sequence>
+      <xsd:element name="Attachment" type="AttachmentType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="RequirementType">
+    <xsd:complexContent>
+      <xsd:extension base="ArtifactType">
+        <xsd:sequence>
+          <xsd:element name="Attachments" type="RequirementAttachmentsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Package" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Revision" type="RevisionType" />
+  <xsd:complexType name="RevisionType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Description" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="RevisionNumber" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="User" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="RevisionHistory" type="RevisionHistoryType" />
+  <xsd:complexType name="RevisionHistoryRevisionsType">
+    <xsd:sequence>
+      <xsd:element name="Revision" type="RevisionType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="RevisionHistoryType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Revisions" type="RevisionHistoryRevisionsType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Subscription" type="SubscriptionType" />
+  <xsd:complexType name="SubscriptionWorkspacesType">
+    <xsd:sequence>
+      <xsd:element name="Workspace" type="WorkspaceType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="SubscriptionType">
+    <xsd:complexContent>
+      <xsd:extension base="PersistableObjectType">
+        <xsd:sequence>
+          <xsd:element name="Modules" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="PasswordExpirationDays" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="PreviousPasswordCount" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="RevisionHistory" type="RevisionHistoryType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="SessionTimeoutSeconds" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="SubscriptionID" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Workspaces" type="SubscriptionWorkspacesType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Tag" type="TagType" />
+  <xsd:complexType name="TagType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Task" type="TaskType" />
+  <xsd:complexType name="TaskAttachmentsType">
+    <xsd:sequence>
+      <xsd:element name="Attachment" type="AttachmentType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="TaskType">
+    <xsd:complexContent>
+      <xsd:extension base="ArtifactType">
+        <xsd:sequence>
+          <xsd:element name="Actuals" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Attachments" type="TaskAttachmentsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Blocked" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Estimate" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Iteration" type="IterationType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Rank" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Release" type="ReleaseType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="State" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskIndex" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ToDo" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="WorkProduct" type="ArtifactType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="TestCase" type="TestCaseType" />
+  <xsd:complexType name="TestCaseAttachmentsType">
+    <xsd:sequence>
+      <xsd:element name="Attachment" type="AttachmentType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="TestCaseResultsType">
+    <xsd:sequence>
+      <xsd:element name="TestCaseResult" type="TestCaseResultType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="TestCaseStepsType">
+    <xsd:sequence>
+      <xsd:element name="TestCaseStep" type="TestCaseStepType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="TestCaseType">
+    <xsd:complexContent>
+      <xsd:extension base="ArtifactType">
+        <xsd:sequence>
+          <xsd:element name="Attachments" type="TestCaseAttachmentsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="LastBuild" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="LastRun" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="LastVerdict" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Method" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Objective" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Package" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="PostConditions" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="PreConditions" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Priority" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Results" type="TestCaseResultsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Risk" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Steps" type="TestCaseStepsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Type" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ValidationExpectedResult" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ValidationInput" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="WorkProduct" type="ArtifactType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="TestCaseResult" type="TestCaseResultType" />
+  <xsd:complexType name="TestCaseResultAttachmentsType">
+    <xsd:sequence>
+      <xsd:element name="Attachment" type="AttachmentType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="TestCaseResultType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Attachments" type="TestCaseResultAttachmentsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Build" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Date" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Duration" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Notes" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TestCase" type="TestCaseType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Tester" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Verdict" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="TestCaseStep" type="TestCaseStepType" />
+  <xsd:complexType name="TestCaseStepType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="ExpectedResult" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Input" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="StepIndex" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TestCase" type="TestCaseType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="TimeEntryItem" type="TimeEntryItemType" />
+  <xsd:complexType name="TimeEntryItemValuesType">
+    <xsd:sequence>
+      <xsd:element name="TimeEntryValue" type="TimeEntryValueType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="TimeEntryItemType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Project" type="ProjectType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ProjectDisplayString" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="RevisionHistory" type="RevisionHistoryType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Task" type="TaskType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskDisplayString" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="User" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Values" type="TimeEntryItemValuesType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="WeekStartDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="WorkProduct" type="ArtifactType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="WorkProductDisplayString" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="TimeEntryValue" type="TimeEntryValueType" />
+  <xsd:complexType name="TimeEntryValueType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="DateVal" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Hours" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="LastUpdated" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="RevisionHistory" type="RevisionHistoryType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TimeEntryItem" type="TimeEntryItemType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="TypeDefinition" type="TypeDefinitionType" />
+  <xsd:complexType name="TypeDefinitionAttributesType">
+    <xsd:sequence>
+      <xsd:element name="AttributeDefinition" type="AttributeDefinitionType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="TypeDefinitionType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Abstract" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Attributes" type="TypeDefinitionAttributesType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Deletable" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="DisplayName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ElementName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Note" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Parent" type="TypeDefinitionType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Queryable" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ReadOnly" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="User" type="UserType" />
+  <xsd:complexType name="UserProjectsType">
+    <xsd:sequence>
+      <xsd:element name="Project" type="ProjectType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="UserUserPermissionsType">
+    <xsd:sequence>
+      <xsd:element name="UserPermission" type="UserPermissionType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="UserType">
+    <xsd:complexContent>
+      <xsd:extension base="DomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Disabled" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="DisplayName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="EmailAddress" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="FirstName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="LastName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="LastPasswordUpdateDate" type="xsd:dateTime" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="LoginName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="MiddleName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Projects" type="UserProjectsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="RevisionHistory" type="RevisionHistoryType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Role" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ShortDisplayName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="UserPermissions" type="UserUserPermissionsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="UserProfile" type="UserProfileType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="UserIterationCapacity" type="UserIterationCapacityType" />
+  <xsd:complexType name="UserIterationCapacityType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Capacity" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Iteration" type="IterationType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Load" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Project" type="ProjectType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskEstimates" type="xsd:double" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="UserName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="UserPermission" type="UserPermissionType" />
+  <xsd:complexType name="UserPermissionType">
+    <xsd:complexContent>
+      <xsd:extension base="DomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="CustomOid" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Role" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="User" type="UserType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="UserProfile" type="UserProfileType" />
+  <xsd:complexType name="UserProfileType">
+    <xsd:complexContent>
+      <xsd:extension base="DomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="DateFormat" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="DateTimeFormat" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="DefaultProject" type="ProjectType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="DefaultWorkspace" type="WorkspaceType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="EmailNotificationEnabled" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="SessionTimeoutSeconds" type="xsd:long" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="SessionTimeoutWarning" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TimeZone" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="WelcomePageHidden" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="WebLinkDefinition" type="WebLinkDefinitionType" />
+  <xsd:complexType name="WebLinkDefinitionType">
+    <xsd:complexContent>
+      <xsd:extension base="AttributeDefinitionType">
+        <xsd:sequence>
+          <xsd:element name="URL" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="Workspace" type="WorkspaceType" />
+  <xsd:complexType name="WorkspaceProjectsType">
+    <xsd:sequence>
+      <xsd:element name="Project" type="ProjectType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="WorkspaceTypeDefinitionsType">
+    <xsd:sequence>
+      <xsd:element name="TypeDefinition" type="TypeDefinitionType" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="WorkspaceType">
+    <xsd:complexContent>
+      <xsd:extension base="DomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Description" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Notes" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Owner" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Projects" type="WorkspaceProjectsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="RevisionHistory" type="RevisionHistoryType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="State" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="Style" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TypeDefinitions" type="WorkspaceTypeDefinitionsType" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="WorkspaceConfiguration" type="WorkspaceConfigurationType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="WorkspaceConfiguration" type="WorkspaceConfigurationType" />
+  <xsd:complexType name="WorkspaceConfigurationType">
+    <xsd:complexContent>
+      <xsd:extension base="WorkspaceDomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="DateFormat" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="DateTimeFormat" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="IterationEstimateUnitName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="ReleaseEstimateUnitName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TaskUnitName" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TimeTrackerEnabled" type="xsd:boolean" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="TimeZone" type="xsd:string" minOccurs="0" maxOccurs="1" />
+          <xsd:element name="WorkDays" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="WorkspaceDomainObject" type="WorkspaceDomainObjectType" />
+  <xsd:complexType name="WorkspaceDomainObjectType">
+    <xsd:complexContent>
+      <xsd:extension base="DomainObjectType">
+        <xsd:sequence>
+          <xsd:element name="Workspace" type="WorkspaceType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="WorkspacePermission" type="WorkspacePermissionType" />
+  <xsd:complexType name="WorkspacePermissionType">
+    <xsd:complexContent>
+      <xsd:extension base="UserPermissionType">
+        <xsd:sequence>
+          <xsd:element name="Workspace" type="WorkspaceType" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+</xsd:schema>
+
