@@ -11,7 +11,15 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.util.JAXBResult;
+import javax.xml.bind.util.JAXBSource;
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
@@ -30,8 +38,11 @@ import standup.Utilities;
 import standup.connector.ConnectorException;
 import standup.connector.HttpClientFactory;
 import standup.connector.UnexpectedResponseException;
+import standup.xml.StoryList;
+import standup.xml.StoryType;
 
 import com.rallydev.xml.DomainObjectType;
+import com.rallydev.xml.HierarchicalRequirementType;
 import com.rallydev.xml.QueryResultType;
 
 
@@ -50,6 +61,9 @@ public class ServerConnection
 	private final HttpClientFactory clientFactory;
 	private JAXBContext jaxb;
 	private Unmarshaller unmarshaller;
+	private final TransformerFactory xformFactory;
+	private final com.rallydev.xml.ObjectFactory rallyFactory;
+	private final standup.xml.ObjectFactory standupFactory;
 
 	public ServerConnection(String serverName, HttpClientFactory clientFactory)
 	{
@@ -57,8 +71,11 @@ public class ServerConnection
 		this.password = "";
 		this.host = new HttpHost(serverName, 443, "https");
 		this.clientFactory = clientFactory;
+		this.xformFactory = TransformerFactory.newInstance();
+		this.rallyFactory = new com.rallydev.xml.ObjectFactory();
+		this.standupFactory = new standup.xml.ObjectFactory();
 		try {
-			this.jaxb = JAXBContext.newInstance("com.rallydev.xml");
+			this.jaxb = JAXBContext.newInstance("com.rallydev.xml:standup.xml");
 			this.unmarshaller = jaxb.createUnmarshaller();
 		} catch (JAXBException e) {
 			throw new Error("failed to initialize XML bindings", e);
@@ -87,6 +104,58 @@ public class ServerConnection
 			iterations.add(iterStatus);
 		}
 		return iterations;
+	}
+
+	public StoryList retrieveStories(String[] stories)
+		throws IOException, ClientProtocolException, ConnectorException
+	{
+		StoryList storyList = this.standupFactory.createStoryList();
+		for (String storyID : stories) {
+			try {
+				QueryResultType result = doQuery("hierarchicalrequirement", true, "FormattedID", "=", storyID.substring(2));
+				for (DomainObjectType domainObj : result.getResults().getObject()) {
+					JAXBElement<DomainObjectType> userStory = this.rallyFactory.createDomainObject(domainObj);
+					StoryType story = this.transformResultInto(StoryType.class, userStory);
+					storyList.getStory().add(story);
+				}
+			} catch (JAXBException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TransformerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return storyList;
+	}
+
+	/* (non-Javadoc)
+	 * @see standup.connector.ServerConnection#retrieveStoriesForIteration(java.lang.String)
+	 */
+	public StoryList retrieveStoriesForIteration(String iteration)
+		throws IOException, ClientProtocolException, ConnectorException
+	{
+		StoryList storyList = this.standupFactory.createStoryList();
+		try {
+			QueryResultType result = doQuery("hierarchicalrequirement", "Iteration.Name", "=", iteration);
+			if (result.getResults() != null) {
+				for (DomainObjectType domainObj : result.getResults().getObject()) {
+					JAXBElement<HierarchicalRequirementType> userStory = this.retrieveJAXBElement(HierarchicalRequirementType.class, new URI(domainObj.getRef()));
+					StoryType story = this.transformResultInto(StoryType.class, userStory);
+					storyList.getStory().add(story);
+				}
+			}
+		} catch (JAXBException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return storyList;
 	}
 
 	/**
@@ -119,7 +188,9 @@ public class ServerConnection
 	 * @return a properly escaped string for use as an HTTP query string.
 	 * @throws EncoderException
 	 */
-	private String buildQueryString(String... tokens) throws EncoderException {
+	private String buildQueryString(boolean includeFullObjects, String... tokens)
+		throws EncoderException
+	{
 		if (tokens.length < 3 || tokens.length%3 != 0) {
 			throw new InvalidParameterException("tokens is a list of triples");
 		}
@@ -137,7 +208,11 @@ public class ServerConnection
 			queryString = String.format("(%s AND (%s))", queryString, querySegments[index]);
 		}		
 		URLCodec codec = new URLCodec("US-ASCII");
-		return "query="+codec.encode(queryString);
+		String query = "query="+codec.encode(queryString);
+		if (includeFullObjects) {
+			query += "&fetch=true";
+		}
+		return query;
 	}
 
 	public void setUsername(String userName) {
@@ -171,11 +246,19 @@ public class ServerConnection
 	private QueryResultType doQuery(String objectType, String... queryParams)
 		throws ClientProtocolException, IOException, ConnectorException, JAXBException
 	{
+		return doQuery(objectType, false, queryParams);
+	}
+
+	private QueryResultType doQuery(String objectType, boolean includeFullObjects,
+	                                String... queryParams)
+		throws ClientProtocolException, IOException, ConnectorException, JAXBException
+	{
+
 		String query = null;
 		String path = Utilities.join("/", Constants.RALLY_BASE_RESOURCE,
 				Constants.RALLY_API_VERSION, objectType);
 		try {
-			query = buildQueryString(queryParams);
+			query = buildQueryString(includeFullObjects, queryParams);
 			URI uri = Utilities.createURI(this.host, path, query);
 			return retrieveURI(QueryResultType.class, uri);
 		} catch (URISyntaxException e) {
@@ -198,6 +281,14 @@ public class ServerConnection
 	public <T> T retrieveURI(Class<T> klass, URI uri)
 		throws ClientProtocolException, IOException, UnexpectedResponseException
 	{
+		JAXBElement<T> jaxbElm = retrieveJAXBElement(klass, uri);
+		return jaxbElm.getValue();
+	}
+
+	protected <T> JAXBElement<T> retrieveJAXBElement(Class<T> klass, URI uri)
+		throws ClientProtocolException, IOException, UnexpectedResponseException
+	{
+		System.out.format("retrieving %s from %s", klass.toString(), uri.toString());
 		HttpGet get = new HttpGet(uri);
 		AbstractHttpClient httpClient = clientFactory.getHttpClient(this);
 		HttpResponse response = httpClient.execute(host, get);
@@ -208,8 +299,8 @@ public class ServerConnection
 				JAXBElement<?> responseObj = (JAXBElement<?>) unmarshaller.unmarshal(entity.getContent());
 				if (responseObj.getDeclaredType() == klass) {
 					@SuppressWarnings("unchecked")
-					T result = (T) responseObj.getValue();
-					return result;
+					JAXBElement<T> elm = (JAXBElement<T>) responseObj;
+					return elm;
 				} else {
 					throw Utilities.generateException(UnexpectedResponseException.class,
 							"unexpected response type", "expected", klass.toString(),
@@ -222,6 +313,44 @@ public class ServerConnection
 		} else {
 			throw new ClientProtocolException("request for "+uri.toString()+"failed");
 		}
+	}
+
+	protected <T,U> U transformResultInto(Class<U> klass, T result) throws JAXBException, TransformerException, UnexpectedResponseException
+	{
+		JAXBSource sourceDoc = new JAXBSource(this.jaxb, result);
+		Marshaller m = this.jaxb.createMarshaller();
+		m.marshal(result, System.out);
+
+		JAXBResult resultDoc = new JAXBResult(this.jaxb);
+		Transformer t = this.xformFactory.newTransformer(new StreamSource(ClassLoader.getSystemResourceAsStream("xslt/rally.xsl")));
+		t.setErrorListener(new ErrorListener() {
+			public void error(TransformerException exception) throws TransformerException {
+				exception.printStackTrace();
+				throw exception;
+			}
+			public void fatalError(TransformerException exception) throws TransformerException {
+				exception.printStackTrace();
+				throw exception;
+			}
+			public void warning(TransformerException exception) throws TransformerException {
+				exception.printStackTrace();
+				throw exception;
+			}
+		});
+		t.transform(sourceDoc, resultDoc);
+
+		Object resultObj = resultDoc.getResult();
+		String resultType = resultObj.getClass().toString();
+		if (resultObj instanceof JAXBElement<?>) {
+			JAXBElement<?> elm = (JAXBElement<?>) resultObj;
+			if (elm.getDeclaredType() == klass) {
+				@SuppressWarnings("unchecked")
+				U outputObj = (U) elm.getValue();
+				return outputObj;
+			}
+			resultType = elm.getDeclaredType().toString();
+		}
+		throw Utilities.generateException(UnexpectedResponseException.class, "unexpected response type", "expected", klass.toString(), "got",resultType);
 	}
 
 }

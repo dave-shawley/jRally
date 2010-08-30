@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	version="1.0">
+
+	<xs:complexType name="inline-element" mixed="true">
+		<xs:group ref="inline-elements" minOccurs="0" maxOccurs="unbounded"/>
+	</xs:complexType>
+	<xs:group name="inline-elements">
+		<xs:choice>
+			<xs:element name="b" type="inline-element"/>
+			<xs:element name="i" type="inline-element"/>
+			<xs:element name="tt" type="inline-element"/>
+			<xs:element name="br"/>
+		</xs:choice>
+	</xs:group>
+
+	<xs:complexType name="simple-list">
+		<xs:sequence>
+			<xs:element name="li" minOccurs="1" maxOccurs="unbounded">
+				<xs:complexType mixed="true">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:group ref="inline-elements" minOccurs="0" maxOccurs="unbounded"/>
+						<xs:group ref="block-elements" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:choice>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:group name="block-elements">
+		<xs:choice>
+			<xs:element name="p">
+				<xs:complexType mixed="true">
+					<xs:group ref="inline-elements" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ul" type="simple-list"/>
+			<xs:element name="ol" type="simple-list"/>
+		</xs:choice>
+	</xs:group>
+
+	<xs:complexType name="block-element">
+		<xs:group ref="block-elements" minOccurs="0" maxOccurs="unbounded"/>
+	</xs:complexType>
+
+	<xs:complexType name="story-type">
+		<xs:sequence>
+			<xs:element name="short-name" type="xs:string"/>
+			<xs:element name="full-name" type="xs:string"/>
+			<xs:element name="identifier" type="xs:string"/>
+			<xs:element name="description" type="block-element"/>
+			<xs:element name="owner" type="xs:string"/>
+			<xs:element name="estimate" type="xs:double"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="story" type="story-type"/>
+
+	<xs:element name="story-list">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="story" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+</xs:schema>

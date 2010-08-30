@@ -25,15 +25,19 @@ public class IterationTest {
 	@Before
 	public void setUp() throws Exception {
 		Calendar cal = new GregorianCalendar();
+
+		// clear out the time related fields, this will roll back
+		// to midnight of the current day
 		cal.clear(Calendar.HOUR_OF_DAY);
 		cal.clear(Calendar.MINUTE);
 		cal.clear(Calendar.SECOND);
 		cal.clear(Calendar.MILLISECOND);
 		
-		cal.roll(Calendar.DAY_OF_MONTH, false);
+		// roll back by one day and use that as the start date
+		cal.add(Calendar.DAY_OF_MONTH, -1);
 		ITERATION_START = cal.getTime();
-		cal.roll(Calendar.DAY_OF_MONTH, true);
-		cal.roll(Calendar.DAY_OF_MONTH, true);
+		// now roll forward by two days and use that as the end date
+		cal.add(Calendar.DAY_OF_MONTH, 2);
 		ITERATION_END = cal.getTime();
 
 		STORIES = new UserStory[] {
@@ -95,7 +99,7 @@ public class IterationTest {
 	public void testSetStartDate() {
 		Calendar cal = new GregorianCalendar();
 		cal.setTime(anIteration.getStartDate());
-		cal.roll(Calendar.MONTH, false);
+		cal.add(Calendar.MONTH, -1);
 		anIteration.setStartDate(cal.getTime());
 		assertEquals(cal.getTime(), anIteration.getStartDate());
 	}
@@ -109,7 +113,7 @@ public class IterationTest {
 	public void testSetEndDate() {
 		Calendar cal = new GregorianCalendar();
 		cal.setTime(anIteration.getEndDate());
-		cal.roll(Calendar.MONTH, true);
+		cal.add(Calendar.MONTH, 1);
 		anIteration.setEndDate(cal.getTime());
 		assertEquals(cal.getTime(), anIteration.getEndDate());
 	}

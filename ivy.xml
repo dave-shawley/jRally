@@ -35,6 +35,11 @@
 			name="commons-collections"
 			rev="3.+"/>
 
+		<dependency
+			org="org.apache.commons"
+			name="commons-cli"
+			rev="1.+"/>
+
 		<!-- dependency
 			org="com.vladium"
 			name="emma"
@@ -44,6 +49,11 @@
 			org="org.easymock"
 			name="easymock"
 			rev="2.+"/>
+
+		<dependency
+			org="org.jdom"
+			name="jdom"
+			rev="1.+"/>
 
 	</dependencies>
 </ivy-module>

@@ -8,6 +8,8 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.http.client.ClientProtocolException;
 
+import standup.xml.StoryList;
+
 /**
  * A connection to an Agile Project Management tool.
  * Implementations of this interface expose different Agile tools
@@ -34,7 +36,27 @@ public interface ServerConnection {
  	public List<IterationStatus> listIterationsForProject(String projectName)
  		throws IOException, JAXBException, ClientProtocolException, ConnectorException;
 
+	/**
+	 * Retrieve a resource and unmarshal it as a specified type.
+	 * 
+	 * This method retrieves the resource located at the specified URI.  The
+	 * response is handed off to JAXB and the result is coerced into the
+	 * requested type.
+	 * 
+	 * @param klass the class to coerce the response into
+	 * @param uri the URI to retrieve the resource from
+	 * @return the coerced instance
+	 * @throws ClientProtocolException
+	 *         thrown if retrieving the resource results in an HTTP error
+	 * @throws IOException
+	 *         thrown if a network error occurs while retrieving the resource
+	 * @throws UnexpectedResponseException
+	 *         thrown if the response cannot be unmarshalled as <tt>klass</tt>
+	 */
 	public <T> T retrieveURI(Class<T> klass, URI uri)
 		throws ClientProtocolException, IOException, UnexpectedResponseException;
+
+	public StoryList retrieveStoriesForIteration(String iterationName)
+		throws IOException, ClientProtocolException, ConnectorException;
 
 }

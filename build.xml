@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
 	xmlns:ivy="antlib:org.apache.ivy.ant"
-  name="RallyTool"
+  name="jRally"
 	default="compile">
 
 	<property name="package.name" value="standup.rally"/>
@@ -104,6 +104,11 @@
 			<depends dir="${schemas.dir}" includes="rally-1.17.xsd"/>
 			<produces dir="${generated.src.dir}/com/rallydev" includes="**/*.java"/>
 		</xjc>
+		<xjc schema="${schemas.dir}/story-list.xsd" target="2.0" removeOldOutput="true"
+			destdir="${generated.src.dir}" package="standup.xml">
+			<depends dir="${schemas.dir}" includes="story-list.xsd"/>
+			<produces dir="${generated.src.dir}/standup/xml" includes="**/*.java"/>
+		</xjc>
 	</target>
 
 	<target name="bootstrap"
@@ -136,8 +141,11 @@
 				<output path="${build.dir}"/>
 				<source path="${src.dir}"/>
 				<source path="${generated.src.dir}"/>
+				<library path="ext-lib/jdom-1.1.1.jar"
+					javadoc="http://www.jdom.org/docs/apidocs/"/>
 				<library pathref="default.classpath"/>
 				<library path="${docs.dir}"/>
+				<library path="${config.dir}"/>
 			</classpath>
 		</eclipse>
 	</target>
@@ -163,6 +171,7 @@
 			<fileset dir="${classes.dir}" excludes="**/*.swp"/>
 			<fileset dir="${jar.dir}" excludes="**/*.swp"/>
 			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
+			<zipfileset dir="${config.dir}/xslt" prefix="xslt"/>
 		</jar>
 	</target>
 
