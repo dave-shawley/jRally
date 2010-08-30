@@ -5,8 +5,7 @@
 	default="compile">
 
 	<property name="package.name" value="standup.rally"/>
-
-	<property name="emma.dir" value="/Users/daveshawley/lib"/>
+	<property file="local.properties"/>
 
 	<!--
 		The following properties are top-level directories that contain the source, libraries,
@@ -170,8 +169,9 @@
 		<jar destfile="${jar.path}" basedir="${jar.dir}">
 			<fileset dir="${classes.dir}" excludes="**/*.swp"/>
 			<fileset dir="${jar.dir}" excludes="**/*.swp"/>
-			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
-			<zipfileset dir="${config.dir}/xslt" prefix="xslt"/>
+			<zipfileset dir="${schemas.dir}" prefix="META-INF/schemas"/>
+			<zipfileset dir="${config.dir}/xslt" prefix="META-INF/xslt"/>
+			<zipfileset dir="${config.dir}" includes="*.properties" prefix="META-INF"/>
 		</jar>
 	</target>
 
@@ -248,13 +248,29 @@
 		</emma>
 	</target>
 
+	<target name="run"
+		description="===> run the command-line application"
+		depends="jar">
+		<java fork="true"
+			classname="standup.application.RetrieveStories"
+			classpathref="run.classpath">
+			<arg value="-v"/>
+			<arg value="-u ${rally.user}"/>
+			<arg value="-p ${rally.password}"/>
+			<arg value="US4270"/>
+			<arg value="US4182"/>
+			<arg value="US4188"/>
+			<arg value="US2888"/>
+		</java>
+	</target>
+
 
 	<!--
 		The following is a twisted but quite functional way of incorporating Emma
 		into the overall process.
 	-->
 	<target name="emma"
-		description="---> enable Emma by mixing this in">
+		description="===> enable Emma by mixing this in">
 		<mkdir dir="${coverage.dir}"/>
 		<mkdir dir="${coverage.report.dir}"/>
 		<property name="emma.enabled" value="true"/>

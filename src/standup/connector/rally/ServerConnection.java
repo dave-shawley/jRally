@@ -11,7 +11,6 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.util.JAXBResult;
 import javax.xml.bind.util.JAXBSource;
@@ -33,6 +32,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.AbstractHttpClient;
+import org.apache.log4j.Logger;
 
 import standup.Utilities;
 import standup.connector.ConnectorException;
@@ -55,6 +55,7 @@ public class ServerConnection
 	implements standup.connector.ServerConnection,
 	           org.apache.http.client.CredentialsProvider
 {
+	private static final Logger logger = Logger.getLogger(ServerConnection.class);
 	private String userName;
 	private String password;
 	private final HttpHost host;
@@ -62,7 +63,6 @@ public class ServerConnection
 	private JAXBContext jaxb;
 	private Unmarshaller unmarshaller;
 	private final TransformerFactory xformFactory;
-	private final com.rallydev.xml.ObjectFactory rallyFactory;
 	private final standup.xml.ObjectFactory standupFactory;
 
 	public ServerConnection(String serverName, HttpClientFactory clientFactory)
@@ -72,7 +72,6 @@ public class ServerConnection
 		this.host = new HttpHost(serverName, 443, "https");
 		this.clientFactory = clientFactory;
 		this.xformFactory = TransformerFactory.newInstance();
-		this.rallyFactory = new com.rallydev.xml.ObjectFactory();
 		this.standupFactory = new standup.xml.ObjectFactory();
 		try {
 			this.jaxb = JAXBContext.newInstance("com.rallydev.xml:standup.xml");
@@ -112,9 +111,9 @@ public class ServerConnection
 		StoryList storyList = this.standupFactory.createStoryList();
 		for (String storyID : stories) {
 			try {
-				QueryResultType result = doQuery("hierarchicalrequirement", true, "FormattedID", "=", storyID.substring(2));
+				QueryResultType result = doQuery("hierarchicalrequirement", "FormattedID", "=", storyID.substring(2));
 				for (DomainObjectType domainObj : result.getResults().getObject()) {
-					JAXBElement<DomainObjectType> userStory = this.rallyFactory.createDomainObject(domainObj);
+					JAXBElement<HierarchicalRequirementType> userStory = this.retrieveJAXBElement(HierarchicalRequirementType.class, new URI(domainObj.getRef()));
 					StoryType story = this.transformResultInto(StoryType.class, userStory);
 					storyList.getStory().add(story);
 				}
@@ -124,6 +123,11 @@ public class ServerConnection
 			} catch (TransformerException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+			catch (URISyntaxException exc)
+			{
+				// TODO Auto-generated catch block
+				exc.printStackTrace();
 			}
 		}
 		return storyList;
@@ -288,7 +292,7 @@ public class ServerConnection
 	protected <T> JAXBElement<T> retrieveJAXBElement(Class<T> klass, URI uri)
 		throws ClientProtocolException, IOException, UnexpectedResponseException
 	{
-		System.out.format("retrieving %s from %s", klass.toString(), uri.toString());
+		logger.debug(String.format("retrieving %s from %s", klass.toString(), uri.toString()));
 		HttpGet get = new HttpGet(uri);
 		AbstractHttpClient httpClient = clientFactory.getHttpClient(this);
 		HttpResponse response = httpClient.execute(host, get);
@@ -318,9 +322,6 @@ public class ServerConnection
 	protected <T,U> U transformResultInto(Class<U> klass, T result) throws JAXBException, TransformerException, UnexpectedResponseException
 	{
 		JAXBSource sourceDoc = new JAXBSource(this.jaxb, result);
-		Marshaller m = this.jaxb.createMarshaller();
-		m.marshal(result, System.out);
-
 		JAXBResult resultDoc = new JAXBResult(this.jaxb);
 		Transformer t = this.xformFactory.newTransformer(new StreamSource(ClassLoader.getSystemResourceAsStream("xslt/rally.xsl")));
 		t.setErrorListener(new ErrorListener() {

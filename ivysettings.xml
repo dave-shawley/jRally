@@ -8,14 +8,12 @@
 	<resolvers>
 		<chain name="chain">
 
-			<!-- First try the Maven 2 public repository -->
-			<ibiblio name="ibiblio" m2compatible="true" usepoms="true"/>
-
 			<url name="download.java.net" m2compatible="true">
 				<artifact pattern="http://download.java.net/maven/2/[organization]/[module]/[revision]/[artifact]-[revision].[ext]"/>
 			</url>
 
-			<!-- Next fall back to the Google Code repository -->
+			<ibiblio name="ibiblio" m2compatible="true" usepoms="true"/>
+
 			<packager name="ivyroundup"
 				buildRoot="${user.home}/.ivy2/packager/build"
 				resourceCache="${user.home}/.ivy2/packager/cache">

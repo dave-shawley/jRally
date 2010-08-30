@@ -55,6 +55,11 @@
 			name="jdom"
 			rev="1.+"/>
 
+		<dependency
+			org="javax.xml.bind"
+			name="jaxb-api"
+			rev="2.2.1"/>
+
 	</dependencies>
 </ivy-module>
 
