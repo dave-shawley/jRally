@@ -60,6 +60,23 @@
 			name="jaxb-api"
 			rev="2.2.1"/>
 
+
+		<!-- These are dependencies of FOP -->
+		<dependency
+			org="org.apache.xmlgraphics"
+			name="xmlgraphics-commons"
+			rev="1.4"/>
+
+		<dependency
+			org="org.apache.avalon"
+			name="avalon-framework"
+			rev="4.2.0"/>
+
+		<dependency
+			org="org.apache.xmlgraphics"
+			name="batik"
+			rev="1.7"/>
+
 	</dependencies>
 </ivy-module>
 

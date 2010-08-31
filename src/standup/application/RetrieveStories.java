@@ -1,5 +1,7 @@
 package standup.application;
 
+import java.io.FileOutputStream;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -72,6 +74,11 @@ public class RetrieveStories {
 
 		StoryList stories = rallyServer.retrieveStories(parsed.getArgs());
 		System.out.format("Found %d stories", stories.getStory().size());
+		
+		FileOutputStream fos = new FileOutputStream("stories.pdf");
+		Formatter formatter = new Formatter();
+		formatter.writeToPDF(stories, fos);
+		fos.close();
 	}
 
 	public static void main(String[] args) {

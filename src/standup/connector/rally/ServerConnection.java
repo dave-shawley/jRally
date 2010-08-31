@@ -315,7 +315,9 @@ public class ServerConnection
 						"failed to unmarshal response");
 			}
 		} else {
-			throw new ClientProtocolException("request for "+uri.toString()+"failed");
+			String msg = String.format("request for '%s' failed: %d %s",
+					uri.toString(), status.getStatusCode(), status.getReasonPhrase());
+			throw new ClientProtocolException(msg);
 		}
 	}
 
