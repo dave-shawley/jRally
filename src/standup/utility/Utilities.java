@@ -1,12 +1,24 @@
-package standup;
+package standup.utility;
 
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.util.JAXBSource;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamSource;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.utils.URIUtils;
+import org.apache.log4j.Logger;
+import org.apache.log4j.NDC;
 
 public class Utilities {
 
@@ -95,6 +107,26 @@ public class Utilities {
 	 */
 	static public URI createURI(HttpHost host, String path, String query) throws URISyntaxException {
 		return URIUtils.createURI(host.getSchemeName(), host.getHostName(), host.getPort(), path, query, "");
+	}
+
+	static public <T extends Result> T runXSLT(T resultDoc, String xsltFilename,
+			Logger logger, JAXBContext jaxb, JAXBSource sourceDocument,
+			TransformerFactory xformFactory)
+		throws JAXBException, TransformerException
+	{
+		NDC.push("processing "+xsltFilename);
+		try {
+			InputStream xsltFile = ClassLoader.getSystemResourceAsStream(xsltFilename);
+			if (xsltFile == null) {
+				throw new TransformerException("getSystemResourceAsStream("+xsltFilename+")");
+			}
+			Transformer t = xformFactory.newTransformer(new StreamSource(xsltFile));
+			t.setErrorListener(new TransformErrorListener(logger));
+			t.transform(sourceDocument, resultDoc);
+			return resultDoc;
+		} finally {
+			NDC.pop();
+		}
 	}
 
 }

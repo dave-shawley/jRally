@@ -252,11 +252,12 @@
 		description="===> run the command-line application"
 		depends="jar">
 		<java fork="true"
-			classname="standup.application.RetrieveStories"
+			classname="standup.application.RetrieveStoriesByID"
 			classpathref="run.classpath">
 			<!--arg value="-v"/-->
 			<arg value="-u"/> <arg value="${rally.user}"/>
 			<arg value="-p"/> <arg value="${rally.password}"/>
+			<arg value="-o"/> <arg value="retrieve-stories.pdf"/>
 			<arg value="US4270"/>
 			<arg value="US4182"/>
 			<arg value="US4188"/>

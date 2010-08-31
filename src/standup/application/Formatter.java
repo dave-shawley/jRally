@@ -7,19 +7,20 @@ import java.io.OutputStream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.util.JAXBSource;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
+import org.apache.log4j.Logger;
 
+import standup.utility.Utilities;
 import standup.xml.StoryList;
 
 
 public class Formatter {
+	private static final Logger logger = Logger.getLogger(Formatter.class);
 	private final FopFactory fopFactory;
 	private final TransformerFactory xformerFactory;
 	private final JAXBContext jaxb;
@@ -35,11 +36,10 @@ public class Formatter {
 		Fop fop;
 		try {
 			fop = fopFactory.newFop(MimeConstants.MIME_PDF, outStream);
-			StreamSource xsltStream = new StreamSource(ClassLoader.getSystemResourceAsStream("xslt/story-cards.xsl"));
-			Transformer xformer = xformerFactory.newTransformer(xsltStream);
 			JAXBSource sourceDoc = new JAXBSource(this.jaxb, stories);
-			SAXResult resultDoc = new SAXResult(fop.getDefaultHandler());
-			xformer.transform(sourceDoc, resultDoc);
+			Utilities.runXSLT(new SAXResult(fop.getDefaultHandler()),
+					"xslt/story-cards.xsl", logger, this.jaxb, sourceDoc,
+					xformerFactory);
 			outStream.close();
 		} catch (Exception e) {
 			e.printStackTrace();

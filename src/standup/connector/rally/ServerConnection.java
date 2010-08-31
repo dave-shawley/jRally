@@ -1,7 +1,6 @@
 package standup.connector.rally;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,11 +14,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.util.JAXBResult;
 import javax.xml.bind.util.JAXBSource;
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
@@ -35,10 +31,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.log4j.Logger;
 
-import standup.Utilities;
 import standup.connector.ConnectorException;
 import standup.connector.HttpClientFactory;
 import standup.connector.UnexpectedResponseException;
+import standup.utility.Utilities;
 import standup.xml.StoryList;
 import standup.xml.StoryType;
 
@@ -87,7 +83,7 @@ public class ServerConnection
 	 */
 	public List<IterationStatus> listIterationsForProject(String project)
 		throws IOException, ClientProtocolException, ConnectorException, JAXBException
-	{		
+	{
 		QueryResultType result = doQuery("iteration", "Project.Name", "=", project);
 		ArrayList<IterationStatus> iterations = new ArrayList<IterationStatus>(
 				Math.min(result.getPageSize().intValue(),
@@ -98,7 +94,7 @@ public class ServerConnection
 			try {
 				iterStatus.iterationURI = new URI(domainObj.getRef());
 			} catch (URISyntaxException e) {
-				e.printStackTrace();
+				logger.error(String.format("iteration %s has invalid URI %s", iterStatus.iterationName, domainObj.getRef()), e);
 				iterStatus.iterationURI = null;
 			}
 			iterations.add(iterStatus);
@@ -119,16 +115,11 @@ public class ServerConnection
 					storyList.getStory().add(story);
 				}
 			} catch (JAXBException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("JAXB related error while processing story "+storyID, e);
 			} catch (TransformerException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			catch (URISyntaxException exc)
-			{
-				// TODO Auto-generated catch block
-				exc.printStackTrace();
+				logger.error("XSLT related error while processing story "+storyID, e);
+			} catch (URISyntaxException e) {
+				logger.error(e.getClass().getCanonicalName(), e);
 			}
 		}
 		return storyList;
@@ -151,14 +142,11 @@ public class ServerConnection
 				}
 			}
 		} catch (JAXBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("JAXB related error while processing iteration "+iteration, e);
 		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("XSLT related error while processing iteration "+iteration, e);
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getClass().getCanonicalName(), e);
 		}
 		return storyList;
 	}
@@ -322,31 +310,12 @@ public class ServerConnection
 		}
 	}
 
-	protected <T,U> U transformResultInto(Class<U> klass, T result) throws JAXBException, TransformerException, UnexpectedResponseException
+	protected <T,U> U transformResultInto(Class<U> klass, T result)
+		throws JAXBException, TransformerException, UnexpectedResponseException
 	{
-		JAXBSource sourceDoc = new JAXBSource(this.jaxb, result);
-		JAXBResult resultDoc = new JAXBResult(this.jaxb);
-		InputStream xsl = ClassLoader.getSystemResourceAsStream("xslt/rally.xsl");
-		if (xsl == null) {
-			throw new TransformerException("getSystemResourceAsStream failed");
-		}
-		Transformer t = this.xformFactory.newTransformer(new StreamSource(xsl));
-		t.setErrorListener(new ErrorListener() {
-			public void error(TransformerException exception) throws TransformerException {
-				exception.printStackTrace();
-				throw exception;
-			}
-			public void fatalError(TransformerException exception) throws TransformerException {
-				exception.printStackTrace();
-				throw exception;
-			}
-			public void warning(TransformerException exception) throws TransformerException {
-				exception.printStackTrace();
-				throw exception;
-			}
-		});
-		t.transform(sourceDoc, resultDoc);
-
+		JAXBResult resultDoc = Utilities.runXSLT(new JAXBResult(this.jaxb),
+				"xslt/rally.xsl", logger, this.jaxb,
+				new JAXBSource(this.jaxb, result), this.xformFactory);
 		Object resultObj = resultDoc.getResult();
 		String resultType = resultObj.getClass().toString();
 		if (resultObj instanceof JAXBElement<?>) {
@@ -358,7 +327,9 @@ public class ServerConnection
 			}
 			resultType = elm.getDeclaredType().toString();
 		}
-		throw Utilities.generateException(UnexpectedResponseException.class, "unexpected response type", "expected", klass.toString(), "got",resultType);
+		throw Utilities.generateException(UnexpectedResponseException.class,
+				"unexpected response type", "expected", klass.toString(),
+				"got",resultType);
 	}
 
 }
