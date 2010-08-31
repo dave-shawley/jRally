@@ -1,6 +1,7 @@
 package standup.connector.rally;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -325,7 +326,11 @@ public class ServerConnection
 	{
 		JAXBSource sourceDoc = new JAXBSource(this.jaxb, result);
 		JAXBResult resultDoc = new JAXBResult(this.jaxb);
-		Transformer t = this.xformFactory.newTransformer(new StreamSource(ClassLoader.getSystemResourceAsStream("xslt/rally.xsl")));
+		InputStream xsl = ClassLoader.getSystemResourceAsStream("xslt/rally.xsl");
+		if (xsl == null) {
+			throw new TransformerException("getSystemResourceAsStream failed");
+		}
+		Transformer t = this.xformFactory.newTransformer(new StreamSource(xsl));
 		t.setErrorListener(new ErrorListener() {
 			public void error(TransformerException exception) throws TransformerException {
 				exception.printStackTrace();

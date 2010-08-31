@@ -170,8 +170,8 @@
 			<fileset dir="${classes.dir}" excludes="**/*.swp"/>
 			<fileset dir="${jar.dir}" excludes="**/*.swp"/>
 			<fileset dir="${config.dir}" includes="*.properties"/>
-			<zipfileset dir="${schemas.dir}" prefix="META-INF/schemas"/>
-			<zipfileset dir="${config.dir}/xslt" prefix="META-INF/xslt"/>
+			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
+			<zipfileset dir="${config.dir}/xslt" prefix="xslt"/>
 		</jar>
 	</target>
 
@@ -254,7 +254,7 @@
 		<java fork="true"
 			classname="standup.application.RetrieveStories"
 			classpathref="run.classpath">
-			<arg value="-v"/>
+			<!--arg value="-v"/-->
 			<arg value="-u"/> <arg value="${rally.user}"/>
 			<arg value="-p"/> <arg value="${rally.password}"/>
 			<arg value="US4270"/>
