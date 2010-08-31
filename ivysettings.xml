@@ -3,14 +3,15 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="../../java/ivy-file-2.1.xsd">
 
+	<property name="ivy.cache.dir" value="${user.home}/.ivy2/cache"/>
+	<properties file="local.properties" override="true"/>
+
 	<settings defaultResolver="chain"/>
 
-	<resolvers>
-		<chain name="chain">
+	<caches defaultCacheDir="${ivy.cache.dir}"/>
 
-			<url name="download.java.net" m2compatible="true">
-				<artifact pattern="http://download.java.net/maven/2/[organization]/[module]/[revision]/[artifact]-[revision].[ext]"/>
-			</url>
+	<resolvers>
+		<chain name="chain" returnFirst="true">
 
 			<ibiblio name="ibiblio" m2compatible="true" usepoms="true"/>
 
@@ -20,6 +21,10 @@
 				<ivy pattern="http://ivyroundup.googlecode.com/svn/trunk/repo/modules/[organisation]/[module]/[revision]/ivy.xml"/>
 				<artifact pattern="http://ivyroundup.googlecode.com/svn/trunk/repo/modules/[organisation]/[module]/[revision]/packager.xml"/>
 			</packager>
+
+			<url name="download.java.net" m2compatible="true">
+				<artifact pattern="http://download.java.net/maven/2/[organization]/[module]/[revision]/[artifact]-[revision].[ext]"/>
+			</url>
 
 			<!-- This one is a failsafe for Eclipse Link stuff since most of the other
 			     repos do not carry them. -->

@@ -40,21 +40,6 @@
 			name="commons-cli"
 			rev="1.+"/>
 
-		<!-- dependency
-			org="com.vladium"
-			name="emma"
-			rev="2.0.+"/ -->
-
-		<dependency
-			org="org.easymock"
-			name="easymock"
-			rev="2.+"/>
-
-		<dependency
-			org="org.jdom"
-			name="jdom"
-			rev="1.+"/>
-
 		<dependency
 			org="javax.xml.bind"
 			name="jaxb-api"
@@ -75,7 +60,8 @@
 		<dependency
 			org="org.apache.xmlgraphics"
 			name="batik"
-			rev="1.7"/>
+			rev="1.7"
+			conf="*->minimal"/>
 
 	</dependencies>
 </ivy-module>

@@ -177,26 +177,26 @@
 
 	<target name="clean"
 		description="===> removes intermediate generated files">
-		<delete dir="${build.dir}"/>
-		<delete file="coverage.ec"/>
+		<delete dir="${build.dir}" deleteonexit="true"/>
+		<delete file="coverage.ec" deleteonexit="true"/>
 	</target>
 
 	<target name="real-clean"
 		description="===> remove all generated files"
 		depends="clean">
-		<delete dir="${output.dir}"/>
-		<delete dir="${generated.src.dir}"/>
-		<delete dir="${javadoc.dir}"/>
-		<delete dir="${report.dir}"/>
-		<delete file="${basedir}/.project"/>
-		<delete file="${basedir}/.classpath"/>
-		<delete dir="${basedir}/.settings"/>
+		<delete dir="${output.dir}" deleteonexit="true"/>
+		<delete dir="${generated.src.dir}" deleteonexit="true"/>
+		<delete dir="${javadoc.dir}" deleteonexit="true"/>
+		<delete dir="${report.dir}" deleteonexit="true"/>
+		<delete file="${basedir}/.project" deleteonexit="true"/>
+		<delete file="${basedir}/.classpath" deleteonexit="true"/>
+		<delete dir="${basedir}/.settings" deleteonexit="true"/>
 	</target>
 
 	<target name="dist-clean"
 		description="===> remove all non-repository files"
 		depends="real-clean">
-		<delete dir="${ivy.lib.dir}"/>
+		<delete dir="${ivy.lib.dir}" deleteonexit="true"/>
 		<mkdir dir="${ivy.lib.dir}"/>
 	</target>
 
