@@ -35,11 +35,11 @@ public class Task
 	}
 
 	private String taskName;
-	private double detailedEstimate;
 	private double toDoRemaining;
 	private double effort;
 	private State state;
 	private final List<StateObserver<Task,Task.State>> observers;
+	private double detailedEstimate;
 
 	/**
 	 * Create a new task with the specified information.

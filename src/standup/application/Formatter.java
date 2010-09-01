@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import standup.utility.Utilities;
 import standup.xml.StoryList;
+import standup.xml.TaskList;
 
 
 public class Formatter {
@@ -37,6 +38,21 @@ public class Formatter {
 		try {
 			fop = fopFactory.newFop(MimeConstants.MIME_PDF, outStream);
 			JAXBSource sourceDoc = new JAXBSource(this.jaxb, stories);
+			Utilities.runXSLT(new SAXResult(fop.getDefaultHandler()),
+					"xslt/story-cards.xsl", logger, this.jaxb, sourceDoc,
+					xformerFactory);
+			outStream.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void writeToPDF(TaskList tasks, FileOutputStream pdfFile) {
+		OutputStream outStream = new BufferedOutputStream(pdfFile);
+		Fop fop;
+		try {
+			fop = fopFactory.newFop(MimeConstants.MIME_PDF, outStream);
+			JAXBSource sourceDoc = new JAXBSource(this.jaxb, tasks);
 			Utilities.runXSLT(new SAXResult(fop.getDefaultHandler()),
 					"xslt/story-cards.xsl", logger, this.jaxb, sourceDoc,
 					xformerFactory);

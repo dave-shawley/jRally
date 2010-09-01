@@ -37,6 +37,7 @@ import standup.connector.UnexpectedResponseException;
 import standup.utility.Utilities;
 import standup.xml.StoryList;
 import standup.xml.StoryType;
+import standup.xml.TaskList;
 
 import com.rallydev.xml.DomainObjectType;
 import com.rallydev.xml.HierarchicalRequirementType;
@@ -102,6 +103,9 @@ public class ServerConnection
 		return iterations;
 	}
 
+	/* (non-Javadoc)
+	 * @see standup.connector.ServerConnection#retrieveStories(java.lang.String[])
+	 */
 	public StoryList retrieveStories(String[] stories)
 		throws IOException, ClientProtocolException, ConnectorException
 	{
@@ -149,6 +153,15 @@ public class ServerConnection
 			logger.error(e.getClass().getCanonicalName(), e);
 		}
 		return storyList;
+	}
+
+	/* (non-Javadoc)
+	 * @see standup.connector.ServerConnection#retrieveTasks(standup.xml.StoryList)
+	 */
+	public TaskList retrieveTasks(StoryList stories)
+		throws IOException, ClientProtocolException, ConnectorException
+	{
+		return null;
 	}
 
 	/**
@@ -219,15 +232,24 @@ public class ServerConnection
 	//=========================================================================
 	// CredentialsProvider implementation
 	//
+	/* (non-Javadoc)
+	 * @see org.apache.http.client.CredentialsProvider#clear()
+	 */
 	public void clear() {
 		this.userName = "";
 		this.password = "";
 	}
 
+	/* (non-Javadoc)
+	 * @see org.apache.http.client.CredentialsProvider#getCredentials(org.apache.http.auth.AuthScope)
+	 */
 	public Credentials getCredentials(AuthScope scope) {
 		return new UsernamePasswordCredentials(this.userName, this.password);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.apache.http.client.CredentialsProvider#setCredentials(org.apache.http.auth.AuthScope, org.apache.http.auth.Credentials)
+	 */
 	public void setCredentials(AuthScope scope, Credentials credentials) {
 		setUsername(credentials.getUserPrincipal().getName());
 		setPassword(credentials.getPassword());

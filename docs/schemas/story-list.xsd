@@ -64,4 +64,33 @@
 		</xs:complexType>
 	</xs:element>
 
+	<xs:complexType name="task-type">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string"/>
+			<xs:element name="detailed-estimate" type="xs:double"/>
+			<xs:element name="todo-remaining" type="xs:double"/>
+			<xs:element name="effort-applied" type="xs:double"/>
+			<xs:element name="task-state">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="NOT_STARTED"/>					
+						<xs:enumeration value="IN_PROGRESS"/>					
+						<xs:enumeration value="WAITING"/>					
+						<xs:enumeration value="BLOCKED"/>					
+						<xs:enumeration value="FINISHED"/>					
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="task" type="task-type"/>
+
+	<xs:element name="task-list">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="task" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
 </xs:schema>

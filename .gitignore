@@ -1,0 +1,17 @@
+#
+# Ignore stuff in build/, bin/, docs/, ext-lib/, and generated-src/
+#
+build/
+bin/
+docs/
+ext-lib/
+generated-src/
+
+# ignore Eclipse workspace files and local settings as well
+/.classpath
+/.project
+/local.properties
+
+# also ignore PDFs at the root level since we have a habit of generating them
+/*.pdf
+

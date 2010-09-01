@@ -9,6 +9,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.http.client.ClientProtocolException;
 
 import standup.xml.StoryList;
+import standup.xml.TaskList;
 
 /**
  * A connection to an Agile Project Management tool.
@@ -35,6 +36,15 @@ public interface ServerConnection {
  	 */
  	public List<IterationStatus> listIterationsForProject(String projectName)
  		throws IOException, JAXBException, ClientProtocolException, ConnectorException;
+ 	
+ 	public StoryList retrieveStoriesForIteration(String iterationName)
+ 		throws IOException, ClientProtocolException, ConnectorException;
+
+ 	public StoryList retrieveStories(String[] stories)
+ 		throws IOException, ClientProtocolException, ConnectorException;
+
+ 	public TaskList retrieveTasks(StoryList stories)
+ 		throws IOException, ClientProtocolException, ConnectorException;
 
 	/**
 	 * Retrieve a resource and unmarshal it as a specified type.
@@ -55,8 +65,5 @@ public interface ServerConnection {
 	 */
 	public <T> T retrieveURI(Class<T> klass, URI uri)
 		throws ClientProtocolException, IOException, UnexpectedResponseException;
-
-	public StoryList retrieveStoriesForIteration(String iterationName)
-		throws IOException, ClientProtocolException, ConnectorException;
 
 }
