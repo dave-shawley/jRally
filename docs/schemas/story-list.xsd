@@ -77,11 +77,16 @@
 
 	<xs:complexType name="task-type">
 		<xs:sequence>
-			<xs:element name="name" type="xs:string"/>
+			<xs:element name="short-name" type="xs:string"/>
+			<xs:element name="full-name" type="xs:string"/>
+			<xs:element name="identifier" type="xs:string"/>
+			<xs:element name="parent-identifier" type="xs:string"/>
+			<xs:element name="description" type="xs:string"/>
+			<xs:element name="owner" type="xs:string"/>
 			<xs:element name="detailed-estimate" type="xs:double"/>
 			<xs:element name="todo-remaining" type="xs:double"/>
 			<xs:element name="effort-applied" type="xs:double"/>
-			<xs:element name="task-state">
+			<xs:element name="state">
 				<xs:simpleType>
 					<xs:restriction base="xs:string">
 						<xs:enumeration value="NOT_STARTED"/>					

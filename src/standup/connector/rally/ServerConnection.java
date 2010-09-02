@@ -43,6 +43,7 @@ import standup.xml.TaskList;
 import com.rallydev.xml.DomainObjectType;
 import com.rallydev.xml.HierarchicalRequirementType;
 import com.rallydev.xml.QueryResultType;
+import com.rallydev.xml.TaskType;
 
 
 /**
@@ -138,6 +139,7 @@ public class ServerConnection
 	{
 		StoryList storyList = this.standupFactory.createStoryList();
 		try {
+			NDC.push("retrieving stories for iteration "+iteration);
 			QueryResultType result = doQuery("hierarchicalrequirement", "Iteration.Name", "=", iteration);
 			if (result.getResults() != null) {
 				for (DomainObjectType domainObj : result.getResults().getObject()) {
@@ -152,6 +154,8 @@ public class ServerConnection
 			logger.error("XSLT related error while processing iteration "+iteration, e);
 		} catch (URISyntaxException e) {
 			logger.error(e.getClass().getCanonicalName(), e);
+		} finally {
+			NDC.pop();
 		}
 		return storyList;
 	}
@@ -164,9 +168,23 @@ public class ServerConnection
 	{
 		TaskList taskList = this.standupFactory.createTaskList();
 		for (StoryType story: stories.getStory()) {
+			String storyID = story.getIdentifier();
 			try {
 				NDC.push("retrieving tasks for "+story.getIdentifier());
 				logger.debug(NDC.peek());
+				QueryResultType result = doQuery("task", "WorkProduct.FormattedID", "=", storyID);
+				for (DomainObjectType domainObj: result.getResults().getObject()) {
+					JAXBElement<TaskType> taskObj = this.retrieveJAXBElement(TaskType.class, new URI(domainObj.getRef()));
+					standup.xml.TaskType task = this.transformResultInto(standup.xml.TaskType.class, taskObj);
+					task.setParentIdentifier(storyID);
+					taskList.getTask().add(task);
+				}
+			} catch (JAXBException e) {
+				logger.error("JAXB related error while processing story "+storyID, e);
+			} catch (TransformerException e) {
+				logger.error("XSLT related error while processing story "+storyID, e);
+			} catch (URISyntaxException e) {
+				logger.error(e.getClass().getCanonicalName(), e);
 			} finally {
 				NDC.pop();
 			}

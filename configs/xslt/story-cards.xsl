@@ -125,4 +125,58 @@
 		</fo:root>
 	</xsl:template>
 
+	<xsl:template match="task">
+		<fo:block-container height="4.75in" width="3.75in" border="4pt solid black">
+			<fo:table>
+				<fo:table-body>
+					<fo:table-row font-size="10pt" font-style="italic" line-height="0.25in">
+						<fo:table-cell>
+							<fo:block text-align="left" margin-left="1em">
+								<xsl:value-of select="parent-identifier/text()"/>
+							</fo:block>
+						</fo:table-cell>
+						<fo:table-cell>
+							<fo:block text-align="right" margin-right="1em">
+								<xsl:value-of select="owner/text()"/>
+							</fo:block>
+						</fo:table-cell>
+					</fo:table-row>
+					<fo:table-row  font-size="14pt" font-weight="bold" line-height="0.5in" border="2pt black solid">
+						<fo:table-cell width="100%" number-columns-spanned="2">
+							<fo:block wrap-option="no-wrap" text-indent="1em">
+								<xsl:value-of select="short-name/text()"/>
+							</fo:block>
+						</fo:table-cell>
+					</fo:table-row>
+					<fo:table-row line-height="4.25in">
+						<fo:table-cell width="1.875in">
+							<fo:block text-align="center" line-height="0.5in" border-right="1pt solid black">
+								<xsl:value-of select="todo-remaining/text()"/>
+							</fo:block>
+						</fo:table-cell>
+						<fo:table-cell line-height="4.25in" width="1.875in" border-left="1pt solid black">
+							<fo:block/>
+						</fo:table-cell>
+					</fo:table-row>
+				</fo:table-body>
+			</fo:table>
+		</fo:block-container>
+	</xsl:template>
+
+	<xsl:template match="task-list">
+		<fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format">
+			<fo:layout-master-set>
+				<fo:simple-page-master master-name="spm" margin="0.5in" page-width="8.5in"
+					page-height="11in">
+					<fo:region-body/>
+				</fo:simple-page-master>
+			</fo:layout-master-set>
+			<fo:page-sequence master-reference="spm">
+				<fo:flow flow-name="xsl-region-body">
+					<xsl:apply-templates select="task"/>
+				</fo:flow>
+			</fo:page-sequence>
+		</fo:root>
+	</xsl:template>
+
 </xsl:stylesheet>
