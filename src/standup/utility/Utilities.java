@@ -5,8 +5,6 @@ import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.util.JAXBSource;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
@@ -83,7 +81,7 @@ public class Utilities {
 	}
 
 	/**
-	 * Join an arbitrary number of objects with a seperator string.
+	 * Join an arbitrary number of objects with a separator string.
 	 * 
 	 * Given all of the options offered by {@link StringUtils}, I was surprised
 	 * to see that it lacked this simple method.
@@ -111,10 +109,29 @@ public class Utilities {
 		return URIUtils.createURI(host.getSchemeName(), host.getHostName(), host.getPort(), path, query, null);
 	}
 
+	/**
+	 * Run an XSL transform on a JAXB source.
+	 * 
+	 * This handy utility locates an XSL transform in the class path using
+	 * {@link ClassLoader#getSystemResourceAsStream(String)}, creates a
+	 * {@link Transformer} object based on it, and runs the input document
+	 * through the transform.  The output is written to {@code resultDoc}
+	 * and returned as well.  A error listener is attached to the transform
+	 * so that errors, warnings, and the like are funnelled to the supplied
+	 * logger instance.
+	 * 
+	 * @param resultDoc       buffer to write result to
+	 * @param xsltFilename    resource name of the XSL transform
+	 * @param logger          logger instance to write transform information on
+	 * @param sourceDocument  input document for the transform
+	 * @param xformFactory    factory to create the Transform object with
+	 * @return the result buffer
+	 * @throws TransformerException
+	 *         when either the transform or transform factory fails
+	 */
 	static public <T extends Result> T runXSLT(T resultDoc, String xsltFilename,
-			Logger logger, JAXBContext jaxb, JAXBSource sourceDocument,
-			TransformerFactory xformFactory)
-		throws JAXBException, TransformerException
+			Logger logger, JAXBSource sourceDocument, TransformerFactory xformFactory)
+		throws TransformerException
 	{
 		NDC.push("processing "+xsltFilename);
 		try {

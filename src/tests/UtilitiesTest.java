@@ -8,7 +8,13 @@ import static org.junit.Assert.fail;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.xml.bind.util.JAXBSource;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXResult;
+
 import org.apache.http.HttpHost;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import standup.utility.Utilities;
@@ -90,10 +96,13 @@ public class UtilitiesTest
 		assertEquals(expected, created);
 	}
 	
-	@Test
-	public void testRunXSLT()
+	@Test(expected=TransformerException.class)
+	public void verifyRunXsltThrowsWithInvalidResource() throws TransformerException
 	{
-		fail("Not yet implemented");
+		SAXResult result = null;
+		JAXBSource source = null;
+		TransformerFactory factory = null;
+		Utilities.runXSLT(result, "non-existant/no-file", Logger.getLogger(Utilities.class), source, factory);
 	}
 
 }

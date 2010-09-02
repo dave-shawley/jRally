@@ -12,17 +12,13 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="html">
+	<xsl:template match="Description">
 		<xsl:for-each select="child::*">
 			<xsl:copy-of select="."/>
 		</xsl:for-each>
 	</xsl:template>
 
-	<xsl:template match="Description">
-		<xsl:apply-templates select="html"/>
-	</xsl:template>
-
-	<xsl:template match="HierarchicalRequirement">
+	<xsl:template match="HierarchicalRequirement|Defect">
 		<xsl:variable name="name" select="@refObjectName"/>
 		<xsl:variable name="state" select="ScheduleState/text()"/>
 		<story>
@@ -39,13 +35,12 @@
 			</short-name>
 			<full-name><xsl:value-of select="$name"/></full-name>
 			<identifier><xsl:value-of select="FormattedID/text()"/></identifier>
-			<description>
-				<xsl:apply-templates select="Description"/>
-			</description>
+			<description/>
 			<owner><xsl:value-of select="Owner/text()"/></owner>
 			<estimate><xsl:value-of select="PlanEstimate/text()"/></estimate>
 			<state>
 				<xsl:choose>
+					<!-- these are the valid story states -->
 					<xsl:when test="$state = 'Backlog'">
 						<xsl:text>NOT_STARTED</xsl:text>
 					</xsl:when>
@@ -59,6 +54,20 @@
 						<xsl:text>COMPLETED</xsl:text>
 					</xsl:when>
 					<xsl:when test="$state = 'Accepted'">
+						<xsl:text>ACCEPTED</xsl:text>
+					</xsl:when>
+					
+					<!-- these are added for defects -->
+					<xsl:when test="$state = 'Submitted'">
+						<xsl:text>NOT_STARTED</xsl:text>
+					</xsl:when>
+					<xsl:when test="$state = 'Open'">
+						<xsl:text>IN_PROGRESS</xsl:text>
+					</xsl:when>
+					<xsl:when test="$state = 'Fixed'">
+						<xsl:text>COMPLETED</xsl:text>
+					</xsl:when>
+					<xsl:when test="$state = 'Closed'">
 						<xsl:text>ACCEPTED</xsl:text>
 					</xsl:when>
 				</xsl:choose>

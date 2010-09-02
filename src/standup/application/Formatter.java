@@ -32,18 +32,30 @@ public class Formatter {
 		jaxb = JAXBContext.newInstance("standup.xml");
 	}
 
+	private void dump(Object obj) {
+		/*
+		String fileName = String.format("xslt-input-%d.xml", obj.hashCode());
+		try {
+			Marshaller m = this.jaxb.createMarshaller();
+			m.marshal(obj, new File(fileName));
+		} catch (Exception e) {
+			logger.error("failed to write intermediate file "+fileName, e);
+		}
+		*/
+	}
+
 	public void writeToPDF(StoryList stories, FileOutputStream pdfFile) {
 		OutputStream outStream = new BufferedOutputStream(pdfFile);
 		Fop fop;
 		try {
+			dump(stories);
 			fop = fopFactory.newFop(MimeConstants.MIME_PDF, outStream);
 			JAXBSource sourceDoc = new JAXBSource(this.jaxb, stories);
 			Utilities.runXSLT(new SAXResult(fop.getDefaultHandler()),
-					"xslt/story-cards.xsl", logger, this.jaxb, sourceDoc,
-					xformerFactory);
+					"xslt/story-cards.xsl", logger, sourceDoc, xformerFactory);
 			outStream.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("failed to generate PDF from StoryList", e);
 		}
 	}
 
@@ -51,14 +63,14 @@ public class Formatter {
 		OutputStream outStream = new BufferedOutputStream(pdfFile);
 		Fop fop;
 		try {
+			dump(tasks);
 			fop = fopFactory.newFop(MimeConstants.MIME_PDF, outStream);
 			JAXBSource sourceDoc = new JAXBSource(this.jaxb, tasks);
 			Utilities.runXSLT(new SAXResult(fop.getDefaultHandler()),
-					"xslt/story-cards.xsl", logger, this.jaxb, sourceDoc,
-					xformerFactory);
+					"xslt/story-cards.xsl", logger, sourceDoc, xformerFactory);
 			outStream.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("failed to generate PDF from StoryList", e);
 		}
 	}
 

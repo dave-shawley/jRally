@@ -11,6 +11,7 @@
 			<xs:element name="b" type="inline-element"/>
 			<xs:element name="i" type="inline-element"/>
 			<xs:element name="tt" type="inline-element"/>
+			<xs:element name="div" type="inline-element"/>
 			<xs:element name="br"/>
 		</xs:choice>
 	</xs:group>
@@ -40,16 +41,18 @@
 		</xs:choice>
 	</xs:group>
 
-	<xs:complexType name="block-element">
-		<xs:group ref="block-elements" minOccurs="0" maxOccurs="unbounded"/>
-	</xs:complexType>
+	<xs:element name="description">
+		<xs:complexType>
+			<xs:group ref="block-elements" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:complexType>
+	</xs:element>
 
 	<xs:complexType name="story-type">
 		<xs:sequence>
 			<xs:element name="short-name" type="xs:string"/>
 			<xs:element name="full-name" type="xs:string"/>
 			<xs:element name="identifier" type="xs:string"/>
-			<xs:element name="description" type="block-element"/>
+			<xs:element ref="description"/>
 			<xs:element name="owner" type="xs:string"/>
 			<xs:element name="estimate" type="xs:double"/>
 			<xs:element name="state">
@@ -81,7 +84,7 @@
 			<xs:element name="full-name" type="xs:string"/>
 			<xs:element name="identifier" type="xs:string"/>
 			<xs:element name="parent-identifier" type="xs:string"/>
-			<xs:element name="description" type="xs:string"/>
+			<xs:element ref="description"/>
 			<xs:element name="owner" type="xs:string"/>
 			<xs:element name="detailed-estimate" type="xs:double"/>
 			<xs:element name="todo-remaining" type="xs:double"/>

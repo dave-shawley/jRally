@@ -1,12 +1,14 @@
 package standup.connector.rally;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -36,10 +38,13 @@ import standup.connector.ConnectorException;
 import standup.connector.HttpClientFactory;
 import standup.connector.UnexpectedResponseException;
 import standup.utility.Utilities;
+import standup.xml.Description;
 import standup.xml.StoryList;
 import standup.xml.StoryType;
 import standup.xml.TaskList;
 
+import com.rallydev.xml.ArtifactType;
+import com.rallydev.xml.DefectType;
 import com.rallydev.xml.DomainObjectType;
 import com.rallydev.xml.HierarchicalRequirementType;
 import com.rallydev.xml.QueryResultType;
@@ -56,6 +61,13 @@ public class ServerConnection
 	           org.apache.http.client.CredentialsProvider
 {
 	private static final Logger logger = Logger.getLogger(ServerConnection.class);
+	private static final Pattern ltPattern = Pattern.compile("&lt;");
+	private static final Pattern gtPattern = Pattern.compile("&gt;");
+	private static final Pattern ampPattern = Pattern.compile("&amp;");
+	private static final Pattern nbspPattern = Pattern.compile("&nbsp;");
+	private static final Pattern brPattern = Pattern.compile("<br\\s*>");
+	private static final Pattern ampPattern2 = Pattern.compile("&");
+
 	private String userName;
 	private String password;
 	private final HttpHost host;
@@ -105,6 +117,31 @@ public class ServerConnection
 		return iterations;
 	}
 
+	protected void processQueryResult(StoryList stories, QueryResultType result)
+		throws ClientProtocolException, UnexpectedResponseException, IOException, URISyntaxException, JAXBException, TransformerException
+	{
+		List<DomainObjectType> domainObjects = result.getResults().getObject();
+		for (DomainObjectType domainObj: domainObjects) {
+			StoryType story = null;
+			ArtifactType artifact = null;
+			String stringType = domainObj.getType();
+			if (stringType.equalsIgnoreCase("HierarchicalRequirement")) {
+				JAXBElement<HierarchicalRequirementType> obj = retrieveJAXBElement(HierarchicalRequirementType.class, new URI(domainObj.getRef()));
+				artifact = obj.getValue();
+				story = this.transformResultInto(StoryType.class, obj);
+			} else if (stringType.equalsIgnoreCase("Defect")) {
+				JAXBElement<DefectType> obj = retrieveJAXBElement(DefectType.class, new URI(domainObj.getRef()));
+				artifact = obj.getValue();
+				story = this.transformResultInto(StoryType.class, obj);
+			} else {
+				// TODO add details
+				throw new Error();
+			}
+			story.setDescription(fixDescription(artifact));
+			stories.getStory().add(story);
+		}
+	}
+
 	/* (non-Javadoc)
 	 * @see standup.connector.ServerConnection#retrieveStories(java.lang.String[])
 	 */
@@ -113,19 +150,45 @@ public class ServerConnection
 	{
 		StoryList storyList = this.standupFactory.createStoryList();
 		for (String storyID : stories) {
+			NDC.push("retrieving story "+storyID);
 			try {
-				QueryResultType result = doQuery("hierarchicalrequirement", "FormattedID", "=", storyID.substring(2));
-				for (DomainObjectType domainObj : result.getResults().getObject()) {
-					JAXBElement<HierarchicalRequirementType> userStory = this.retrieveJAXBElement(HierarchicalRequirementType.class, new URI(domainObj.getRef()));
-					StoryType story = this.transformResultInto(StoryType.class, userStory);
-					storyList.getStory().add(story);
+				String objectType = null;
+				if (storyID.startsWith("US")) {
+					objectType = "hierarchicalrequirement";
+					/*result = doQuery("hierarchicalrequirement", "FormattedID", "=", storyID);
+					processQueryResult(storyList, result);
+					for (DomainObjectType domainObj : result.getResults().getObject()) {
+						JAXBElement<HierarchicalRequirementType> userStory = this.retrieveJAXBElement(HierarchicalRequirementType.class, new URI(domainObj.getRef()));
+						StoryType story = this.transformResultInto(StoryType.class, userStory);
+						story.setDescription(fixDescription(userStory.getValue()));
+						storyList.getStory().add(story);
+					}*/
+				} else if (storyID.startsWith("DE")) {
+					objectType = "defect";
+					/*result = doQuery("defect", "FormattedID", "=", storyID);
+					processQueryResult(storyList, result);
+					if (result.getResults() != null) {
+						for (DomainObjectType domainObj : result.getResults().getObject()) {
+							JAXBElement<DefectType> defect = this.retrieveJAXBElement(DefectType.class, new URI(domainObj.getRef()));
+							StoryType story = this.transformResultInto(StoryType.class, defect);
+							story.setDescription(fixDescription(defect.getValue()));
+							storyList.getStory().add(story);
+						}
+					}*/
+				} else {
+					// TODO add details
+					throw new Error();
 				}
+				QueryResultType result = doQuery(objectType, "FormattedID", "=", storyID);
+				processQueryResult(storyList, result);
 			} catch (JAXBException e) {
 				logger.error("JAXB related error while processing story "+storyID, e);
 			} catch (TransformerException e) {
 				logger.error("XSLT related error while processing story "+storyID, e);
 			} catch (URISyntaxException e) {
 				logger.error(e.getClass().getCanonicalName(), e);
+			} finally {
+				NDC.pop();
 			}
 		}
 		return storyList;
@@ -141,13 +204,25 @@ public class ServerConnection
 		try {
 			NDC.push("retrieving stories for iteration "+iteration);
 			QueryResultType result = doQuery("hierarchicalrequirement", "Iteration.Name", "=", iteration);
-			if (result.getResults() != null) {
+			processQueryResult(storyList, result);
+			/*if (result.getResults() != null) {
 				for (DomainObjectType domainObj : result.getResults().getObject()) {
 					JAXBElement<HierarchicalRequirementType> userStory = this.retrieveJAXBElement(HierarchicalRequirementType.class, new URI(domainObj.getRef()));
 					StoryType story = this.transformResultInto(StoryType.class, userStory);
 					storyList.getStory().add(story);
 				}
-			}
+			}*/
+			NDC.pop();
+			NDC.push("retrieving defects for iteration "+iteration);
+			result = doQuery("defect", "Iteration.Name", "=", iteration);
+			processQueryResult(storyList, result);
+			/*if (result.getResults() != null) {
+				for (DomainObjectType domainObj : result.getResults().getObject()) {
+					JAXBElement<DefectType> defect = this.retrieveJAXBElement(DefectType.class, new URI(domainObj.getRef()));
+					StoryType story = this.transformResultInto(StoryType.class, defect);
+					storyList.getStory().add(story);
+				}
+			}*/
 		} catch (JAXBException e) {
 			logger.error("JAXB related error while processing iteration "+iteration, e);
 		} catch (TransformerException e) {
@@ -364,8 +439,8 @@ public class ServerConnection
 		throws JAXBException, TransformerException, UnexpectedResponseException
 	{
 		JAXBResult resultDoc = Utilities.runXSLT(new JAXBResult(this.jaxb),
-				"xslt/rally.xsl", logger, this.jaxb,
-				new JAXBSource(this.jaxb, result), this.xformFactory);
+				"xslt/rally.xsl", logger, new JAXBSource(this.jaxb, result),
+				this.xformFactory);
 		Object resultObj = resultDoc.getResult();
 		String resultType = resultObj.getClass().toString();
 		if (resultObj instanceof JAXBElement<?>) {
@@ -380,6 +455,30 @@ public class ServerConnection
 		throw Utilities.generateException(UnexpectedResponseException.class,
 				"unexpected response type", "expected", klass.toString(),
 				"got",resultType);
+	}
+
+	protected Description fixDescription(ArtifactType artifact) {
+		String descString = artifact.getDescription();
+		descString = ltPattern.matcher(descString).replaceAll("<");		// &lt; -> "<"
+		descString = gtPattern.matcher(descString).replaceAll(">");		// &gt; -> ">"
+		descString = ampPattern.matcher(descString).replaceAll("&");	// necessary to catch &nbsp;
+		descString = nbspPattern.matcher(descString).replaceAll(" ");	// &nbsp; -> " "
+		descString = brPattern.matcher(descString).replaceAll("<br/>");	// <br> -> <br/>
+		descString = ampPattern2.matcher(descString).replaceAll("&amp;"); // & -> &amp;
+		if (!descString.startsWith("<p>")) {
+			descString = String.format("<p>%s</p>", descString);
+		}
+		descString = String.format("<description>%s</description>", descString);
+
+		try {
+			Object obj = unmarshaller.unmarshal(new StringReader(descString));
+			if (obj instanceof Description) {
+				return (Description) obj;
+			}
+		} catch (JAXBException e) {
+			logger.error("failed to unmarshal description <<"+descString+">>", e);
+		}
+		return this.standupFactory.createDescription();
 	}
 
 }
