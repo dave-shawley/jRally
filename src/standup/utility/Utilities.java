@@ -42,7 +42,7 @@ public class Utilities {
 		T exc = null;
 		StringBuilder message = new StringBuilder(msg);
 		if (objects.length > 0) {
-			message.append(":");
+			message.append(": ");
 			message.append(Utilities.join(" ", objects));
 		}
 		try {
@@ -52,7 +52,9 @@ public class Utilities {
 		} catch (Throwable t) {
 			// Yuck... this really shouldn't happen unless you, the person
 			// reading this, has done something horribly wrong...
-			t.printStackTrace();
+			throw new Error(String.format(
+				"exception class %s constructor threw an exception",
+				exceptionClass.getCanonicalName()), t);
 		}
 		return exc;
 	}
@@ -106,7 +108,7 @@ public class Utilities {
 	 * @see URIUtils#createURI(String, String, int, String, String, String)
 	 */
 	static public URI createURI(HttpHost host, String path, String query) throws URISyntaxException {
-		return URIUtils.createURI(host.getSchemeName(), host.getHostName(), host.getPort(), path, query, "");
+		return URIUtils.createURI(host.getSchemeName(), host.getHostName(), host.getPort(), path, query, null);
 	}
 
 	static public <T extends Result> T runXSLT(T resultDoc, String xsltFilename,

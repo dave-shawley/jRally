@@ -52,6 +52,17 @@
 			<xs:element name="description" type="block-element"/>
 			<xs:element name="owner" type="xs:string"/>
 			<xs:element name="estimate" type="xs:double"/>
+			<xs:element name="state">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="NOT_STARTED"/>
+						<xs:enumeration value="IN_PROGRESS"/>
+						<xs:enumeration value="COMPLETED"/>
+						<xs:enumeration value="ACCEPTED"/>
+						<xs:enumeration value="BLOCKED"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:element name="story" type="story-type"/>

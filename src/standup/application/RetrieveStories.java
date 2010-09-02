@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -36,6 +37,10 @@ public abstract class RetrieveStories {
 
 	@SuppressWarnings("static-access")
 	protected Options buildOptions() {
+		// Note that the various .isRequired() specifiers are commented
+		// out.  We want to allow the --help option by itself.  If we
+		// let the cli package handle it, you get a rather non-informative
+		// error message back that only includes the short options... ick.
 		Options options = new Options();
 		options.addOption(
 			OptionBuilder
@@ -50,13 +55,13 @@ public abstract class RetrieveStories {
 		options.addOption(
 			OptionBuilder
 				.withLongOpt(USER_KEY)
-				.hasArg().withArgName("USER").isRequired()
+				.hasArg().withArgName("USER") //.isRequired()
 				.withDescription("connect to Rally with the user name USER")
 				.create("u"));
 		options.addOption(
 			OptionBuilder
 				.withLongOpt(PASSWORD_KEY)
-				.hasArg().withArgName("PASSWORD").isRequired()
+				.hasArg().withArgName("PASSWORD") //.isRequired()
 				.withDescription("use this password when connecting to Rally")
 				.create("p"));
 		options.addOption(
@@ -80,22 +85,20 @@ public abstract class RetrieveStories {
 		try {
 			Parser cmdLineParser = new GnuParser();
 			parsedCmdLine = cmdLineParser.parse(opts, args, true);
+			if (!processOptions(parsedCmdLine)) {
+				showHelp(opts);
+				return;
+			}
+		} catch (MissingOptionException e) {
+			e.printStackTrace();
+			return;
 		} catch (ParseException e) {
 			e.printStackTrace();
 			return;
 		}
 
-		if (parsedCmdLine.hasOption(HELP_KEY)) {
-			showHelp(opts);
-			return;
-		}
-		if (parsedCmdLine.hasOption(VERBOSE_KEY)) {
-			Logger.getRootLogger().setLevel(Level.DEBUG);
-		}
-		processOptions(parsedCmdLine);
-
-		ServerConnection rallyServer = new ServerConnection(Constants.RALLY_SERVER_NAME,
-				new DefaultHttpClientFactory());
+		ServerConnection rallyServer = new ServerConnection(
+				Constants.RALLY_SERVER_NAME, new DefaultHttpClientFactory());
 		rallyServer.setUsername(parsedCmdLine.getOptionValue(USER_KEY));
 		rallyServer.setPassword(parsedCmdLine.getOptionValue(PASSWORD_KEY));
 		
@@ -116,12 +119,28 @@ public abstract class RetrieveStories {
 		formatter.printHelp(myName + " [options] story-id...", opts);
 	}
 
-	protected void processOptions(CommandLine parsedCmdLine) throws Exception {
+	protected boolean processOptions(CommandLine parsedCmdLine) throws Exception {
+		if (parsedCmdLine.hasOption(HELP_KEY)) {
+			return false;
+		}
+		if (parsedCmdLine.hasOption(VERBOSE_KEY)) {
+			Logger.getRootLogger().setLevel(Level.DEBUG);
+		}
+		if (!parsedCmdLine.hasOption(USER_KEY)) {
+			throw new MissingOptionException("--user (-u) is a required option");
+		}
+		if (!parsedCmdLine.hasOption(PASSWORD_KEY)) {
+			throw new MissingOptionException(
+				"--password (-p) is a required option");
+		}
+
 		this.storyFilename = parsedCmdLine.getOptionValue(STORY_FILE_KEY, null);
 		this.taskFilename = parsedCmdLine.getOptionValue(TASK_FILE_KEY, null);
 		if (this.storyFilename == null && this.taskFilename == null) {
-			throw new Exception(String.format("one of %s or %s is required", STORY_FILE_KEY, TASK_FILE_KEY));
+			throw new MissingOptionException(String.format(
+				"one of %s or %s is required", STORY_FILE_KEY, TASK_FILE_KEY));
 		}
+		return true;
 	}
 
 	abstract protected StoryList fetchStories(standup.connector.ServerConnection server) throws Exception;

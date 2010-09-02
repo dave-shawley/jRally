@@ -16,6 +16,7 @@
 
 	<xsl:template match="HierarchicalRequirement|DomainObject[@type='HierarchicalRequirement']">
 		<xsl:variable name="name" select="@refObjectName"/>
+		<xsl:variable name="state" select="ScheduleState/text()"/>
 		<story>
 			<short-name>
 				<xsl:choose>
@@ -35,6 +36,25 @@
 			</description>
 			<owner><xsl:value-of select="Owner/text()"/></owner>
 			<estimate><xsl:value-of select="PlanEstimate/text()"/></estimate>
+			<state>
+				<xsl:choose>
+					<xsl:when test="$state = 'Backlog'">
+						<xsl:text>NOT_STARTED</xsl:text>
+					</xsl:when>
+					<xsl:when test="$state = 'Defined'">
+						<xsl:text>NOT_STARTED</xsl:text>
+					</xsl:when>
+					<xsl:when test="$state = 'In-Progress'">
+						<xsl:text>IN_PROGRESS</xsl:text>
+					</xsl:when>
+					<xsl:when test="$state = 'Completed'">
+						<xsl:text>COMPLETED</xsl:text>
+					</xsl:when>
+					<xsl:when test="$state = 'Accepted'">
+						<xsl:text>ACCEPTED</xsl:text>
+					</xsl:when>
+				</xsl:choose>
+			</state>
 		</story>
 	</xsl:template>
 

@@ -101,7 +101,7 @@
 		<xjc schema="${schemas.dir}/rally-1.17.xsd" target="2.0" removeOldOutput="true"
 			destdir="${generated.src.dir}" package="com.rallydev.xml">
 			<depends dir="${schemas.dir}" includes="rally-1.17.xsd"/>
-			<produces dir="${generated.src.dir}/com/rallydev" includes="**/*.java"/>
+			<produces dir="${generated.src.dir}/com/rallydev/xml" includes="**/*.java"/>
 		</xjc>
 		<xjc schema="${schemas.dir}/story-list.xsd" target="2.0" removeOldOutput="true"
 			destdir="${generated.src.dir}" package="standup.xml">

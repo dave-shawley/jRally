@@ -12,9 +12,12 @@ public class RetrieveStoriesByID extends RetrieveStories {
 	private String[] storyIdList = null;
 	
 	@Override
-	protected void processOptions(CommandLine parsedCmdLine) throws Exception {
-		super.processOptions(parsedCmdLine);
+	protected boolean processOptions(CommandLine parsedCmdLine) throws Exception {
+		if (!super.processOptions(parsedCmdLine)) {
+			return false;
+		}
 		this.storyIdList = parsedCmdLine.getArgs();
+		return true;
 	}
 
 	@Override

@@ -33,14 +33,17 @@ public class RetrieveStoriesForIteration extends RetrieveStories {
 	 * @see standup.application.RetrieveStories#processOptions(org.apache.commons.cli.CommandLine)
 	 */
 	@Override
-	protected void processOptions(CommandLine parsedCmdLine) throws Exception {
-		super.processOptions(parsedCmdLine);
+	protected boolean processOptions(CommandLine parsedCmdLine) throws Exception {
+		if (!super.processOptions(parsedCmdLine)) {
+			return false;
+		}
 		String[] remainingArgs = parsedCmdLine.getArgs();
 		if (remainingArgs.length == 1) {
 			this.iterationName = remainingArgs[0];
 		} else {
 			throw new MissingOptionException("a single iteration name is required");
 		}
+		return true;
 	}
 
 	/* (non-Javadoc)

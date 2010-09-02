@@ -30,6 +30,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.log4j.Logger;
+import org.apache.log4j.NDC;
 
 import standup.connector.ConnectorException;
 import standup.connector.HttpClientFactory;
@@ -161,7 +162,16 @@ public class ServerConnection
 	public TaskList retrieveTasks(StoryList stories)
 		throws IOException, ClientProtocolException, ConnectorException
 	{
-		return null;
+		TaskList taskList = this.standupFactory.createTaskList();
+		for (StoryType story: stories.getStory()) {
+			try {
+				NDC.push("retrieving tasks for "+story.getIdentifier());
+				logger.debug(NDC.peek());
+			} finally {
+				NDC.pop();
+			}
+		}
+		return taskList;
 	}
 
 	/**
