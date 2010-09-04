@@ -96,6 +96,7 @@ public class ServerConnection
 	/* (non-Javadoc)
 	 * @see standup.connector.ServerConnection#listIterationsForProject(java.lang.String)
 	 */
+	@Override
 	public List<IterationStatus> listIterationsForProject(String project)
 		throws IOException, ClientProtocolException, ConnectorException, JAXBException
 	{
@@ -145,6 +146,7 @@ public class ServerConnection
 	/* (non-Javadoc)
 	 * @see standup.connector.ServerConnection#retrieveStories(java.lang.String[])
 	 */
+	@Override
 	public StoryList retrieveStories(String[] stories)
 		throws IOException, ClientProtocolException, ConnectorException
 	{
@@ -155,26 +157,8 @@ public class ServerConnection
 				String objectType = null;
 				if (storyID.startsWith("US")) {
 					objectType = "hierarchicalrequirement";
-					/*result = doQuery("hierarchicalrequirement", "FormattedID", "=", storyID);
-					processQueryResult(storyList, result);
-					for (DomainObjectType domainObj : result.getResults().getObject()) {
-						JAXBElement<HierarchicalRequirementType> userStory = this.retrieveJAXBElement(HierarchicalRequirementType.class, new URI(domainObj.getRef()));
-						StoryType story = this.transformResultInto(StoryType.class, userStory);
-						story.setDescription(fixDescription(userStory.getValue()));
-						storyList.getStory().add(story);
-					}*/
 				} else if (storyID.startsWith("DE")) {
 					objectType = "defect";
-					/*result = doQuery("defect", "FormattedID", "=", storyID);
-					processQueryResult(storyList, result);
-					if (result.getResults() != null) {
-						for (DomainObjectType domainObj : result.getResults().getObject()) {
-							JAXBElement<DefectType> defect = this.retrieveJAXBElement(DefectType.class, new URI(domainObj.getRef()));
-							StoryType story = this.transformResultInto(StoryType.class, defect);
-							story.setDescription(fixDescription(defect.getValue()));
-							storyList.getStory().add(story);
-						}
-					}*/
 				} else {
 					// TODO add details
 					throw new Error();
@@ -197,6 +181,7 @@ public class ServerConnection
 	/* (non-Javadoc)
 	 * @see standup.connector.ServerConnection#retrieveStoriesForIteration(java.lang.String)
 	 */
+	@Override
 	public StoryList retrieveStoriesForIteration(String iteration)
 		throws IOException, ClientProtocolException, ConnectorException
 	{
@@ -205,24 +190,11 @@ public class ServerConnection
 			NDC.push("retrieving stories for iteration "+iteration);
 			QueryResultType result = doQuery("hierarchicalrequirement", "Iteration.Name", "=", iteration);
 			processQueryResult(storyList, result);
-			/*if (result.getResults() != null) {
-				for (DomainObjectType domainObj : result.getResults().getObject()) {
-					JAXBElement<HierarchicalRequirementType> userStory = this.retrieveJAXBElement(HierarchicalRequirementType.class, new URI(domainObj.getRef()));
-					StoryType story = this.transformResultInto(StoryType.class, userStory);
-					storyList.getStory().add(story);
-				}
-			}*/
 			NDC.pop();
+
 			NDC.push("retrieving defects for iteration "+iteration);
 			result = doQuery("defect", "Iteration.Name", "=", iteration);
 			processQueryResult(storyList, result);
-			/*if (result.getResults() != null) {
-				for (DomainObjectType domainObj : result.getResults().getObject()) {
-					JAXBElement<DefectType> defect = this.retrieveJAXBElement(DefectType.class, new URI(domainObj.getRef()));
-					StoryType story = this.transformResultInto(StoryType.class, defect);
-					storyList.getStory().add(story);
-				}
-			}*/
 		} catch (JAXBException e) {
 			logger.error("JAXB related error while processing iteration "+iteration, e);
 		} catch (TransformerException e) {
@@ -238,6 +210,7 @@ public class ServerConnection
 	/* (non-Javadoc)
 	 * @see standup.connector.ServerConnection#retrieveTasks(standup.xml.StoryList)
 	 */
+	@Override
 	public TaskList retrieveTasks(StoryList stories)
 		throws IOException, ClientProtocolException, ConnectorException
 	{
@@ -338,6 +311,7 @@ public class ServerConnection
 	/* (non-Javadoc)
 	 * @see org.apache.http.client.CredentialsProvider#clear()
 	 */
+	@Override
 	public void clear() {
 		this.userName = "";
 		this.password = "";
@@ -346,6 +320,7 @@ public class ServerConnection
 	/* (non-Javadoc)
 	 * @see org.apache.http.client.CredentialsProvider#getCredentials(org.apache.http.auth.AuthScope)
 	 */
+	@Override
 	public Credentials getCredentials(AuthScope scope) {
 		return new UsernamePasswordCredentials(this.userName, this.password);
 	}
@@ -353,6 +328,7 @@ public class ServerConnection
 	/* (non-Javadoc)
 	 * @see org.apache.http.client.CredentialsProvider#setCredentials(org.apache.http.auth.AuthScope, org.apache.http.auth.Credentials)
 	 */
+	@Override
 	public void setCredentials(AuthScope scope, Credentials credentials) {
 		setUsername(credentials.getUserPrincipal().getName());
 		setPassword(credentials.getPassword());
@@ -396,6 +372,7 @@ public class ServerConnection
 		}
 	}
 
+	@Override
 	public <T> T retrieveURI(Class<T> klass, URI uri)
 		throws ClientProtocolException, IOException, UnexpectedResponseException
 	{

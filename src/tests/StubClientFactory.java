@@ -1,9 +1,10 @@
 package tests;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import org.apache.http.HttpClientConnection;
-import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -22,12 +23,10 @@ import standup.connector.HttpClientFactory;
 
 class StubHttpRequestExecutor extends HttpRequestExecutor {
 
-	private final StatusLine statusLine;
-	private final String content;
+	private final HttpResponse cannedResponse;
 
-	public StubHttpRequestExecutor(int code, String content) {
-		this.statusLine = new BasicStatusLine(HttpVersion.HTTP_1_1, code, null);
-		this.content = content;
+	public StubHttpRequestExecutor(HttpResponse rsp) {
+		this.cannedResponse = rsp;
 	}
 
 	/* (non-Javadoc)
@@ -35,11 +34,8 @@ class StubHttpRequestExecutor extends HttpRequestExecutor {
 	 */
 	@Override
 	public HttpResponse execute(HttpRequest request, HttpClientConnection conn, HttpContext context)
-		throws IOException, HttpException
 	{
-		HttpResponse response = new BasicHttpResponse(this.statusLine);
-		response.setEntity(new StringEntity(this.content));
-		return response;
+		return this.cannedResponse;
 	}
 
 }
@@ -47,29 +43,38 @@ class StubHttpRequestExecutor extends HttpRequestExecutor {
 
 public class StubClientFactory implements HttpClientFactory {
 
-	private int nextResponseCode;
-	private String nextResponseData;
+	private final Queue<HttpResponse> responses = new LinkedList<HttpResponse>();
+
+	private StatusLine buildStatusLine(int code) {
+		return new BasicStatusLine(HttpVersion.HTTP_1_1, code, null);
+	}
 
 	public void setNextResponse(int code) {
-		this.nextResponseCode = code;
-		this.nextResponseData = "";
+		responses.add(new BasicHttpResponse(buildStatusLine(code)));
 	}
 
 	public void setNextResponse(int code, String data) {
-		this.nextResponseCode = code;
-		this.nextResponseData = data;
+		HttpResponse rsp = new BasicHttpResponse(buildStatusLine(code));
+		try {
+			rsp.setEntity(new StringEntity(data));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		responses.add(rsp);
 	}
 
+	@Override
 	public AbstractHttpClient getHttpClient() {
 		AbstractHttpClient client = new DefaultHttpClient() {
 			@Override
 			protected HttpRequestExecutor createRequestExecutor() {
-				return new StubHttpRequestExecutor(nextResponseCode, nextResponseData);
+				return new StubHttpRequestExecutor(responses.poll());
 			}
 		};
 		return client;
 	}
 
+	@Override
 	public AbstractHttpClient getHttpClient(CredentialsProvider credentials) {
 		AbstractHttpClient client = getHttpClient();
 		client.setCredentialsProvider(credentials);
