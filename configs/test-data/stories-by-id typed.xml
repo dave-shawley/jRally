@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<QueryResult rallyAPIMajor="1" rallyAPIMinor="17" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<Errors />
-	<Warnings />
+<QueryResult rallyAPIMajor="1" rallyAPIMinor="17"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Errors/>
+	<Warnings/>
 	<TotalResultCount>2</TotalResultCount>
 	<StartIndex>1</StartIndex>
 	<PageSize>20</PageSize>
 	<Results>
-		<Object rallyAPIMajor="1" rallyAPIMinor="17" ref="https://rally1.rallydev.com/slm/webservice/1.17/hierarchicalrequirement/11" objectVersion="9" refObjectName="Fetch rain, snow, etc details from the provider" CreatedAt="Aug 31" type="HierarchicalRequirement" xsi:type="HierarchicalRequirementType">
+		<Object rallyAPIMajor="1" rallyAPIMinor="17"
+			ref="https://rally1.rallydev.com/slm/webservice/1.17/hierarchicalrequirement/11"
+			objectVersion="9" refObjectName="Fetch rain, snow, etc details from the provider"
+			CreatedAt="Aug 31" type="HierarchicalRequirement" xsi:type="HierarchicalRequirementType">
 			<CreationDate>2010-08-31T16:52:20.717Z</CreationDate>
 			<ObjectID>11</ObjectID>
 			<Subscription rallyAPIMajor="1" rallyAPIMinor="17"
@@ -15,7 +19,7 @@
 			<Workspace rallyAPIMajor="1" rallyAPIMinor="17"
 				ref="https://rally1.rallydev.com/slm/webservice/1.17/workspace/1"
 				refObjectName="Simple Sprint Backlog Example" type="Workspace"/>
-			<Description></Description>
+			<Description/>
 			<Discussion/>
 			<FormattedID>US11</FormattedID>
 			<LastUpdateDate>2010-09-01T14:28:25.428Z</LastUpdateDate>
@@ -57,7 +61,10 @@
 			</Tasks>
 			<TestCases/>
 		</Object>
-		<Object rallyAPIMajor="1" rallyAPIMinor="17" ref="https://rally1.rallydev.com/slm/webservice/1.17/hierarchicalrequirement/12" objectVersion="23" refObjectName="Fetch serveral days data from the provider" CreatedAt="Dec 7, 2009"  type="HierarchicalRequirement" xsi:type="HierarchicalRequirementType">
+		<Object rallyAPIMajor="1" rallyAPIMinor="17"
+			ref="https://rally1.rallydev.com/slm/webservice/1.17/hierarchicalrequirement/12"
+			objectVersion="23" refObjectName="Fetch serveral days data from the provider"
+			CreatedAt="Dec 7, 2009" type="HierarchicalRequirement" xsi:type="HierarchicalRequirementType">
 			<CreationDate>2010-08-31T16:52:20.717Z</CreationDate>
 			<ObjectID>12</ObjectID>
 			<Subscription rallyAPIMajor="1" rallyAPIMinor="17"
@@ -66,7 +73,7 @@
 			<Workspace rallyAPIMajor="1" rallyAPIMinor="17"
 				ref="https://rally1.rallydev.com/slm/webservice/1.17/workspace/1"
 				refObjectName="Simple Sprint Backlog Example" type="Workspace"/>
-			<Description></Description>
+			<Description/>
 			<Discussion/>
 			<FormattedID>US12</FormattedID>
 			<LastUpdateDate>2010-09-01T14:28:25.428Z</LastUpdateDate>
@@ -110,4 +117,3 @@
 		</Object>
 	</Results>
 </QueryResult>
-

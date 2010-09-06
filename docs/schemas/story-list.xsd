@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	version="1.0">
+	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+	version="1.0" jaxb:version="2.0">
 
 	<xs:complexType name="inline-element" mixed="true">
+		<xs:annotation>
+			<xs:documentation>An inline-element is used within a text block to
+				indicate formatting.  They can be nested to an arbitrary depth though
+				it is usually pointless to go more than two deep.</xs:documentation>
+		</xs:annotation>
 		<xs:group ref="inline-elements" minOccurs="0" maxOccurs="unbounded"/>
 	</xs:complexType>
 	<xs:group name="inline-elements">
+		<xs:annotation>
+			<xs:documentation>This group defines the available list of inline
+				elements.  This should look familar to anyone who has ever looked
+				at HTML.  The only real variation is that I was forced to consider
+				a &lt;div&gt; element as an inline instead of a block element to
+				make some of Rally's strange documentation conventions not blow up.
+			</xs:documentation>
+		</xs:annotation>
 		<xs:choice>
 			<xs:element name="b" type="inline-element"/>
 			<xs:element name="i" type="inline-element"/>
@@ -17,8 +31,21 @@
 	</xs:group>
 
 	<xs:complexType name="simple-list">
+		<xs:annotation>
+			<xs:documentation>This is a very simple list of items.  Each item is
+				represented as a list-item (&lt;li&gt;) element and the entire list
+				is a container.  Note that unlike HTML, lists are well-formed XML
+				here without mixed mode.  This means that it is not legal to put
+				text between list items.</xs:documentation>
+		</xs:annotation>
 		<xs:sequence>
 			<xs:element name="li" minOccurs="1" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>A single list item.  This is a block-level element
+						so it can contain both block-level and inline elements.  This makes
+						it possible to nest lists as well as stick multiple paragraphs in
+						a single list item.</xs:documentation>
+				</xs:annotation>
 				<xs:complexType mixed="true">
 					<xs:choice minOccurs="0" maxOccurs="unbounded">
 						<xs:group ref="inline-elements" minOccurs="0" maxOccurs="unbounded"/>
@@ -30,8 +57,18 @@
 	</xs:complexType>
 
 	<xs:group name="block-elements">
+		<xs:annotation>
+			<xs:documentation>This group defines the block level elements.  A block
+				element contains inline elements and/or other block elements.  This is
+				also different than HTML where the containment is not as well-defined.
+				In this model, a paragraph cannot contain a list but a list can contain
+				lists and paragraphs.</xs:documentation>
+		</xs:annotation>
 		<xs:choice>
 			<xs:element name="p">
+				<xs:annotation>
+					<xs:documentation>A paragraph of styled text.</xs:documentation>
+				</xs:annotation>
 				<xs:complexType mixed="true">
 					<xs:group ref="inline-elements" minOccurs="0" maxOccurs="unbounded"/>
 				</xs:complexType>
@@ -42,19 +79,74 @@
 	</xs:group>
 
 	<xs:element name="description">
+		<xs:annotation>
+			<xs:documentation>A description gets its own top-level element so
+				that we can deal with some particularly unpleasant processing of
+				Rally descriptions.  A description is basically a list of block
+				level elements.  Rally gives these to us as XML-escaped strings
+				so I have to do some manipulation on the description before I
+				can create a proper element.  This is the only reason that this
+				is a top-level element.</xs:documentation>
+		</xs:annotation>
 		<xs:complexType>
 			<xs:group ref="block-elements" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:complexType>
 	</xs:element>
 
+	<xs:complexType name="links">
+		<xs:sequence>
+			<xs:element name="link">
+				<xs:annotation>
+					<xs:documentation>A link to a related item.  These are used to
+						track the source of this item - usually a link into Rally or
+						something similar.</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:anyURI">
+							<xs:attribute name="owner" type="xs:string" use="required">
+								<xs:annotation>
+									<xs:documentation>Indicates what portion of the application
+										created the link or in what context the link is relevant.
+										This should be a human-recognizable string.</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+							<xs:attribute name="rel" type="xs:string" use="optional">
+								<xs:annotation>
+									<xs:documentation>Optional tag that describes how this link
+										relates to the object.</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
 	<xs:complexType name="story-type">
 		<xs:sequence>
+			<xs:element name="links" type="links" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Links related to this story.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element name="short-name" type="xs:string"/>
 			<xs:element name="full-name" type="xs:string"/>
 			<xs:element name="identifier" type="xs:string"/>
 			<xs:element ref="description"/>
-			<xs:element name="owner" type="xs:string"/>
-			<xs:element name="estimate" type="xs:double"/>
+			<xs:element name="owner" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Usually the email address of the owner of this
+						story.  Ownership has a team-defined semantic.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="estimate" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>Complexity estimate for this story.  This is also
+						known as "points" or "value" in various camps.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element name="state">
 				<xs:simpleType>
 					<xs:restriction base="xs:string">
@@ -68,11 +160,22 @@
 			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
-	<xs:element name="story" type="story-type"/>
+	<xs:element name="story" type="story-type">
+		<xs:annotation>
+			<xs:documentation>A schedulable entity.  A story is the highest class
+				of actionable items within this model.  I do not currently support
+				stories with child stories (e.g., epics) since they are not of concern
+				to the basic processing that this application does.
+			
+				A story is scheduled onto an iteration and it contains zero or more
+				workable tasks.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
 
 	<xs:element name="story-list">
 		<xs:complexType>
 			<xs:sequence>
+				<xs:element name="links" type="links" minOccurs="0"/>
 				<xs:element ref="story" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>
@@ -80,15 +183,33 @@
 
 	<xs:complexType name="task-type">
 		<xs:sequence>
+			<xs:element name="links" type="links" minOccurs="0"/>
 			<xs:element name="short-name" type="xs:string"/>
 			<xs:element name="full-name" type="xs:string"/>
 			<xs:element name="identifier" type="xs:string"/>
 			<xs:element name="parent-identifier" type="xs:string"/>
 			<xs:element ref="description"/>
 			<xs:element name="owner" type="xs:string"/>
-			<xs:element name="detailed-estimate" type="xs:double"/>
-			<xs:element name="todo-remaining" type="xs:double"/>
-			<xs:element name="effort-applied" type="xs:double"/>
+			<xs:element name="detailed-estimate" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>The detailed number of hours that this task
+						is expected to take.  This value should not be changed once the
+						iteration has started.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="todo-remaining" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>The remaining number of hours that this task
+						requires before completion.  This value is updated regularly.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="effort-applied" type="xs:double">
+				<xs:annotation>
+					<xs:documentation>The number of hours that have already been
+						applied to this task.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element name="state">
 				<xs:simpleType>
 					<xs:restriction base="xs:string">
@@ -102,11 +223,18 @@
 			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
-	<xs:element name="task" type="task-type"/>
+	<xs:element name="task" type="task-type">
+		<xs:annotation>
+			<xs:documentation>The smallest unit of work in this model.  A task
+				is the atomic unit of effort.  Work is done against a task and rolled
+				up to the parent story as appropriate.</xs:documentation>
+		</xs:annotation>
+	</xs:element>
 
 	<xs:element name="task-list">
 		<xs:complexType>
 			<xs:sequence>
+				<xs:element name="links" type="links" minOccurs="0"/>
 				<xs:element ref="task" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>
