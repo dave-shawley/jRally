@@ -63,6 +63,10 @@ public class StubClientFactory implements HttpClientFactory {
 		responses.add(rsp);
 	}
 
+	public int numberOfResponsesLeft() {
+		return responses.size();
+	}
+
 	@Override
 	public AbstractHttpClient getHttpClient() {
 		AbstractHttpClient client = new DefaultHttpClient() {

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QueryResult rallyAPIMajor="1" rallyAPIMinor="17">
+	<Errors />
+	<Warnings />
+	<TotalResultCount>2</TotalResultCount>
+	<StartIndex>1</StartIndex>
+	<PageSize>20</PageSize>
+	<Results>
+		<Object rallyAPIMajor="1" rallyAPIMinor="17"
+			ref="https://rally1.rallydev.com/slm/webservice/1.17/hierarchicalrequirement/11"
+			refObjectName="Fetch rain, snow, etc details from the provider" type="HierarchicalRequirement"/>
+		<Object rallyAPIMajor="1" rallyAPIMinor="17"
+			ref="https://rally1.rallydev.com/slm/webservice/1.17/hierarchicalrequirement/12"
+			refObjectName="Fetch serveral days data from the provider" type="HierarchicalRequirement"/>
+	</Results>
+</QueryResult>
+

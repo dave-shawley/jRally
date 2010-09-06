@@ -1,0 +1,22 @@
+<QueryResult rallyAPIMajor="1" rallyAPIMinor="17">
+	<Errors/>
+	<Warnings/>
+	<TotalResultCount>8</TotalResultCount>
+	<StartIndex>1</StartIndex>
+	<PageSize>20</PageSize>
+	<Results>
+		<Object rallyAPIMajor="1" rallyAPIMinor="17"
+			ref="https://rally1.rallydev.com/slm/webservice/1.17/hierarchicalrequirement/10"
+			refObjectName="Fetch one day temperature data from the weather provider system"
+			type="HierarchicalRequirement"/>
+		<Object rallyAPIMajor="1" rallyAPIMinor="17"
+			ref="https://rally1.rallydev.com/slm/webservice/1.17/hierarchicalrequirement/11"
+			refObjectName="Fetch rain, snow, etc details from the provider" type="HierarchicalRequirement"/>
+		<Object rallyAPIMajor="1" rallyAPIMinor="17"
+			ref="https://rally1.rallydev.com/slm/webservice/1.17/hierarchicalrequirement/12"
+			refObjectName="Fetch serveral days data from the provider" type="HierarchicalRequirement"/>
+		<Object rallyAPIMajor="1" rallyAPIMinor="17"
+			ref="https://rally1.rallydev.com/slm/webservice/1.17/hierarchicalrequirement/13"
+			refObjectName="Auto-refresh feature" type="HierarchicalRequirement"/>
+	</Results>
+</QueryResult>

@@ -2,10 +2,12 @@ package tests;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -13,9 +15,11 @@ import org.apache.http.client.ClientProtocolException;
 import org.junit.Before;
 import org.junit.Test;
 
-import standup.connector.UnexpectedResponseException;
 import standup.connector.ServerConnection.IterationStatus;
+import standup.connector.UnexpectedResponseException;
 import standup.connector.rally.ServerConnection;
+import standup.xml.StoryList;
+import standup.xml.StoryType;
 
 
 /**
@@ -23,10 +27,14 @@ import standup.connector.rally.ServerConnection;
  */
 public class RallyServerConnectionTest {
 	
-	private static final String PROJECT_NAME = "A Project";
+	private static final String PROJECT_NAME = "Weather on Mobile";
 	private static final String SERVER_NAME = "rally1.rallydev.com";
-	private static final String ITERATION_URL = "https://server/slm/webservice/1.17/iteration/42";
-	private static final String ITERATION_NAME = "An Iteration";
+	private static final String ITERATION_URL = "https://server/slm/webservice/1.17/iteration/";
+	private static final String[] ITERATION_NAMES = {
+		"Make Sample Data Go from Server to Device", "Minimal Working Version",
+		"Plug in the Real Weather"
+	};
+	private static final String ACTIVE_ITERATION_NAME = ITERATION_NAMES[2];
 	private static final String PASSWORD = "<P@s5w0rD";
 	private static final String USER_NAME = "dave.shawley@schange.com";
 	private ServerConnection conn;
@@ -68,27 +76,58 @@ public class RallyServerConnectionTest {
 
 	@Test
 	public void testRetreiveIterations() throws Exception {
-		Integer expectedResultCount = 2;
-		factory.setNextResponse(200,
-				"<?xml version='1.0'?>" +
-				"<QueryResult rallyAPIMajor=\"1\" rallyAPIMinor=\"17\">" +
-				"<Errors/><Warnings/><TotalResultCount>"+expectedResultCount.toString()+"</TotalResultCount>" +
-				"<StartIndex>1</StartIndex><PageSize>20</PageSize><Results>" +
-				"<Object ref=\""+ITERATION_URL+"\" " +
-					"rallyAPIMajor='1' rallyAPIMinor='17' type='Iteration' " +
-					"refObjectName=\""+ITERATION_NAME+"\"/>" +
-				"<Object ref=\"an invalid URL\" " +
-					"rallyAPIMajor='1' rallyAPIMinor='17' type='Iteration' " +
-					"refObjectName=\""+ITERATION_NAME+"\"/>" +
-				"</Results></QueryResult>");
+		factory.setNextResponse(200, getResourceAsString("test-data/iterations.xml"));
 		conn.setUsername(USER_NAME);
 		conn.setPassword(PASSWORD);
 		List<IterationStatus> iterations = conn.listIterationsForProject(PROJECT_NAME);
-		assertEquals(expectedResultCount.intValue(), iterations.size());
-		assertEquals(ITERATION_NAME, iterations.get(0).iterationName);
-		assertEquals(new URI(ITERATION_URL), iterations.get(0).iterationURI);
-		assertEquals(ITERATION_NAME, iterations.get(1).iterationName);
-		assertEquals(null, iterations.get(1).iterationURI);
+		assertEquals(ITERATION_NAMES.length, iterations.size());
+		int index = 0;
+		for (IterationStatus iteration: iterations) {
+			assertEquals(ITERATION_NAMES[index], iteration.iterationName);
+			assertEquals(new URI(ITERATION_URL+Integer.toString(index+1)), iteration.iterationURI);
+			index++;
+		}
+		assertEquals(0, factory.numberOfResponsesLeft());
+	}
+
+	@Test
+	public void testRetrieveStoriesForIteration() throws Exception {
+		factory.setNextResponse(200, getResourceAsString("test-data/iteration-3.xml"));
+		factory.setNextResponse(200, getResourceAsString("test-data/story-10.xml"));
+		factory.setNextResponse(200, getResourceAsString("test-data/story-11.xml"));
+		factory.setNextResponse(200, getResourceAsString("test-data/story-12.xml"));
+		factory.setNextResponse(200, getResourceAsString("test-data/story-13.xml"));
+		factory.setNextResponse(200, getResourceAsString("test-data/empty-response.xml"));
+		conn.setUsername(USER_NAME);
+		conn.setPassword(PASSWORD);
+		StoryList storyList = conn.retrieveStoriesForIteration(ACTIVE_ITERATION_NAME);
+		List<StoryType> stories = storyList.getStory();
+		assertEquals(4, stories.size());
+		assertEquals(0, factory.numberOfResponsesLeft());
+	}
+
+	@Test
+	public void testRetrieveStoriesByID() throws Exception {
+		factory.setNextResponse(200, getResourceAsString("test-data/stories-by-id.xml"));
+		factory.setNextResponse(200, getResourceAsString("test-data/story-11.xml"));
+		factory.setNextResponse(200, getResourceAsString("test-data/story-12.xml"));
+		conn.setUsername(USER_NAME);
+		conn.setPassword(PASSWORD);
+		StoryList storyList = conn.retrieveStories(new String[]{"US11", "US12"});
+		List<StoryType> stories = storyList.getStory();
+		assertEquals(2, stories.size());
+		assertEquals(0, factory.numberOfResponsesLeft());
+	}
+
+	@Test
+	public void testRetrieveStoriesByIdWithTypes() throws Exception {
+		factory.setNextResponse(200, getResourceAsString("test-data/stories-by-id typed.xml"));
+		conn.setUsername(USER_NAME);
+		conn.setPassword(PASSWORD);
+		StoryList storyList = conn.retrieveStories(new String[]{"US11", "US12"});
+		List<StoryType> stories = storyList.getStory();
+		assertEquals(2, stories.size());
+		assertEquals(0, factory.numberOfResponsesLeft());
 	}
 
 	@Test(expected=ClientProtocolException.class)
@@ -127,6 +166,11 @@ public class RallyServerConnectionTest {
 	public void stubUnexpectedXml() throws Exception {
 		factory.setNextResponse(200, "<?xml version='1.0'?><some-document/>");
 		conn.listIterationsForProject(PROJECT_NAME);
+	}
+
+	// Utility functions
+	protected String getResourceAsString(String resourceName) throws IOException {
+		return IOUtils.toString(ClassLoader.getSystemResourceAsStream(resourceName));
 	}
 }
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QueryResult rallyAPIMajor="1" rallyAPIMinor="17">
+	<Errors/>
+	<Warnings/>
+	<TotalResultCount>3</TotalResultCount>
+	<StartIndex>1</StartIndex>
+	<PageSize>20</PageSize>
+	<Results>
+		<Object rallyAPIMajor="1" rallyAPIMinor="17"
+			ref="https://server/slm/webservice/1.17/iteration/1"
+			refObjectName="Make Sample Data Go from Server to Device"
+			type="Iteration"/>
+		<Object rallyAPIMajor="1" rallyAPIMinor="17"
+			ref="https://server/slm/webservice/1.17/iteration/2"
+			refObjectName="Minimal Working Version"
+			type="Iteration"/>
+		<Object rallyAPIMajor="1" rallyAPIMinor="17"
+			ref="https://server/slm/webservice/1.17/iteration/3"
+			refObjectName="Plug in the Real Weather"
+			type="Iteration"/>
+	</Results>
+</QueryResult>

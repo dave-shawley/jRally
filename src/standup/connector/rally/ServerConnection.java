@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -121,25 +122,49 @@ public class ServerConnection
 	protected void processQueryResult(StoryList stories, QueryResultType result)
 		throws ClientProtocolException, UnexpectedResponseException, IOException, URISyntaxException, JAXBException, TransformerException
 	{
+		List<String> errors = result.getErrors().getOperationResultError();
+		if (errors.size() > 0) {
+			for (String err: errors) {
+				logger.error(err);
+			}
+			return;
+		}
+		for (String warning: result.getWarnings().getOperationResultWarning()) {
+			logger.warn(warning);
+		}
+
+		com.rallydev.xml.ObjectFactory rallyFactory = new com.rallydev.xml.ObjectFactory();
 		List<DomainObjectType> domainObjects = result.getResults().getObject();
 		for (DomainObjectType domainObj: domainObjects) {
 			StoryType story = null;
 			ArtifactType artifact = null;
+			JAXBElement<? extends ArtifactType> obj = null;
 			String stringType = domainObj.getType();
 			if (stringType.equalsIgnoreCase("HierarchicalRequirement")) {
-				JAXBElement<HierarchicalRequirementType> obj = retrieveJAXBElement(HierarchicalRequirementType.class, new URI(domainObj.getRef()));
-				artifact = obj.getValue();
-				story = this.transformResultInto(StoryType.class, obj);
+				if (domainObj instanceof HierarchicalRequirementType) { // xsi:type in use!
+					obj = rallyFactory.createHierarchicalRequirement((HierarchicalRequirementType) domainObj);
+					artifact = (HierarchicalRequirementType) domainObj;
+				} else { // we need to fetch this explicitly
+					obj = retrieveJAXBElement(HierarchicalRequirementType.class, new URI(domainObj.getRef()));
+					artifact = obj.getValue();
+				}
 			} else if (stringType.equalsIgnoreCase("Defect")) {
-				JAXBElement<DefectType> obj = retrieveJAXBElement(DefectType.class, new URI(domainObj.getRef()));
-				artifact = obj.getValue();
-				story = this.transformResultInto(StoryType.class, obj);
-			} else {
-				// TODO add details
-				throw new Error();
+				if (domainObj instanceof DefectType) {
+					obj = rallyFactory.createDefect((DefectType) domainObj);
+					artifact = (DefectType) domainObj;
+				} else {
+					obj = retrieveJAXBElement(DefectType.class, new URI(domainObj.getRef()));
+					artifact = obj.getValue();
+				}
 			}
-			story.setDescription(fixDescription(artifact));
-			stories.getStory().add(story);
+	
+			if (artifact != null) {
+				story = this.transformResultInto(StoryType.class, obj);
+				story.setDescription(fixDescription(artifact));
+				stories.getStory().add(story);
+			} else {
+				logger.debug(String.format("ignoring DomainObject %d of type %s", domainObj.getObjectID(), stringType));
+			}
 		}
 	}
 
@@ -150,31 +175,44 @@ public class ServerConnection
 	public StoryList retrieveStories(String[] stories)
 		throws IOException, ClientProtocolException, ConnectorException
 	{
-		StoryList storyList = this.standupFactory.createStoryList();
-		for (String storyID : stories) {
-			NDC.push("retrieving story "+storyID);
-			try {
-				String objectType = null;
-				if (storyID.startsWith("US")) {
-					objectType = "hierarchicalrequirement";
-				} else if (storyID.startsWith("DE")) {
-					objectType = "defect";
-				} else {
-					// TODO add details
-					throw new Error();
-				}
-				QueryResultType result = doQuery(objectType, "FormattedID", "=", storyID);
-				processQueryResult(storyList, result);
-			} catch (JAXBException e) {
-				logger.error("JAXB related error while processing story "+storyID, e);
-			} catch (TransformerException e) {
-				logger.error("XSLT related error while processing story "+storyID, e);
-			} catch (URISyntaxException e) {
-				logger.error(e.getClass().getCanonicalName(), e);
-			} finally {
-				NDC.pop();
-			}
+		StringBuilder builder = new StringBuilder();
+		List<String> segments = new ArrayList<String>(stories.length);
+		for (String storyID: stories) {
+			segments.add(String.format("FormattedID = \"%s\"", storyID));
+			builder.append("(");
 		}
+
+		Iterator<String> iter = segments.iterator();
+		builder.append(iter.next()).append(")");
+		while (iter.hasNext()) {
+			builder.append(" OR (").append(iter.next()).append("))");
+		}
+		if (logger.isDebugEnabled()) logger.debug("query="+builder.toString());
+
+		StoryList storyList = this.standupFactory.createStoryList();
+		try {
+			URLCodec codec = new URLCodec("US-ASCII");
+			String query = "query="+codec.encode(builder.toString());
+			// + "&fetch=true";
+			// This is not supported yet... each sub-object will result in another
+			// HTTP request.  If the response included xsi:type, then we could
+			// fetch everything in one request and JAXB would correctly detect the
+			// types for us...
+			String path = Utilities.join("/", Constants.RALLY_BASE_RESOURCE,
+					Constants.RALLY_API_VERSION, "artifact");
+			URI uri = Utilities.createURI(this.host, path, query);
+			QueryResultType result = retrieveURI(QueryResultType.class, uri);
+			processQueryResult(storyList, result);
+		} catch (JAXBException e) {
+			logger.error("JAXB related error while retrieving multiple stories", e);
+		} catch (TransformerException e) {
+			logger.error("XSLT related error while retrieving multiple stories", e);
+		} catch (URISyntaxException e) {
+			logger.error(e.getClass().getCanonicalName(), e);
+		} catch (EncoderException e) {
+			logger.error(e.getClass().getCanonicalName(), e);
+		}
+		
 		return storyList;
 	}
 
@@ -265,36 +303,40 @@ public class ServerConnection
 	 * <tr><td>AttributePath</td><td>&#x2192;</td><td>The path to an attribute. For instance, when querying for tasks that are in a given iteration, it's possible to use the path "Card.Iteration" because Task has a "Card" attribute, and Card has an "Iteration" attribute.</td></tr>
 	 * <tr><td>AttributeValue</td><td>&#x2192;</td><td>Some value. Strings with spaces must be double-quoted (single quotations are not allowed). Object references should be expressed as the REST URI for the object. Use "null" (double quotations optional) to query for a null value in an object reference, integer, decimal or date attribute.</td></tr>
 	 * </table>
-	 * 
+	 * @param joiner TODO
 	 * @param tokens
+	 * 
 	 * @return a properly escaped string for use as an HTTP query string.
 	 * @throws EncoderException
 	 */
-	private String buildQueryString(boolean includeFullObjects, String... tokens)
+	private String buildQueryString(String... tokens)
 		throws EncoderException
 	{
 		if (tokens.length < 3 || tokens.length%3 != 0) {
 			throw new InvalidParameterException("tokens is a list of triples");
 		}
 
+		String separator = " AND (";
+		StringBuilder builder = new StringBuilder();
 		String querySegments[] = new String[tokens.length / 3];
 		int index = 0;
 		while (index < tokens.length) {
 			querySegments[index/3] = String.format("%s %s \"%s\"",
 					tokens[index], tokens[index+1], tokens[index+2]);
 			index += 3;
+			builder.append("(");
 		}
 
-		String queryString = String.format("(%s)", querySegments[0]);
-		for (index=1; index<querySegments.length; ++index) {
-			queryString = String.format("(%s AND (%s))", queryString, querySegments[index]);
-		}		
-		URLCodec codec = new URLCodec("US-ASCII");
-		String query = "query="+codec.encode(queryString);
-		if (includeFullObjects) {
-			query += "&fetch=true";
+		index = 0;
+		builder.append(querySegments[index++]).append(")");
+		while (index < querySegments.length) {
+			builder.append(separator)
+			       .append(querySegments[index++])
+			       .append("))");
 		}
-		return query;
+		if (logger.isDebugEnabled()) logger.debug("query="+builder.toString());
+		URLCodec codec = new URLCodec("US-ASCII");
+		return "query="+codec.encode(builder.toString());
 	}
 
 	public void setUsername(String userName) {
@@ -340,19 +382,11 @@ public class ServerConnection
 	private QueryResultType doQuery(String objectType, String... queryParams)
 		throws ClientProtocolException, IOException, ConnectorException, JAXBException
 	{
-		return doQuery(objectType, false, queryParams);
-	}
-
-	private QueryResultType doQuery(String objectType, boolean includeFullObjects,
-	                                String... queryParams)
-		throws ClientProtocolException, IOException, ConnectorException, JAXBException
-	{
-
 		String query = null;
 		String path = Utilities.join("/", Constants.RALLY_BASE_RESOURCE,
 				Constants.RALLY_API_VERSION, objectType);
 		try {
-			query = buildQueryString(includeFullObjects, queryParams);
+			query = buildQueryString(queryParams);
 			URI uri = Utilities.createURI(this.host, path, query);
 			return retrieveURI(QueryResultType.class, uri);
 		} catch (URISyntaxException e) {
