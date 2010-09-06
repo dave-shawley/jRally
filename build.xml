@@ -37,6 +37,7 @@
 	<property name="build.dir" location="build"/>
 	<property name="classes.dir" value="${build.dir}/classes"/>
 	<property name="jar.dir" value="${build.dir}/jar"/>
+	<property name="test.jar.dir" value="${build.dir}/test-jar"/>
 	<property name="war.dir" value="${build.dir}/war"/>
 	<property name="coverage.dir" value="${build.dir}/coverage"/>
 	<!-- This is not defined here, read the comments above the "emma" target -->
@@ -53,6 +54,7 @@
 	-->
 	<property name="output.dir" location="bin"/>
 	<property name="jar.path" value="${output.dir}/${ant.project.name}.jar"/>
+	<property name="test.jar.path" value="${output.dir}/${ant.project.name}-tests.jar"/>
 	<property name="war.path" value="${output.dir}/${ant.project.name}.war"/>
 	<property name="javadoc.dir" value="${docs.dir}/api"/>
 	<property name="report.dir" value="${docs.dir}/reports"/>
@@ -78,7 +80,7 @@
 
 	<path id="run.classpath">
 		<path refid="default.classpath"/>
-		<fileset file="${output.dir}/${ant.project.name}.jar"/>
+		<fileset dir="${output.dir}" includes="**/*.jar"/>
 	</path>
 
 
@@ -177,11 +179,24 @@
 		depends="compile">
 		<mkdir dir="${jar.dir}"/>
 		<jar destfile="${jar.path}" basedir="${jar.dir}">
-			<fileset dir="${classes.dir}" excludes="**/*.swp"/>
-			<fileset dir="${jar.dir}" excludes="**/*.swp"/>
+			<fileset dir="${classes.dir}">
+				<exclude name="**/*.swp"/>
+				<exclude name="tests/**/*.class"/>
+			</fileset>
 			<fileset dir="${config.dir}" includes="*.properties"/>
 			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
 			<zipfileset dir="${config.dir}/xslt" prefix="xslt"/>
+		</jar>
+	</target>
+
+	<target name="test-jar"
+		description="===> build the jar contain unit tests and test data"
+		depends="compile">
+		<mkdir dir="${test.jar.dir}"/>
+		<jar destfile="${test.jar.path}" basedir="${test.jar.dir}">
+			<fileset dir="${classes.dir}" includes="tests/**/*.class"/>
+			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
+			<zipfileset dir="${config.dir}/test-data" prefix="test-data"/>
 		</jar>
 	</target>
 
@@ -210,6 +225,7 @@
 		<delete dir="${ivy.lib.dir}" deleteonexit="true"/>
 		<mkdir dir="${ivy.lib.dir}"/>
 	</target>
+
 
 	<target name="test"
 		description="===> run the test classes"
@@ -258,6 +274,7 @@
 			</report>
 		</emma>
 	</target>
+
 
 	<target name="run"
 		description="===> run the command-line application"

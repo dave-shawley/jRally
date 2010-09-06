@@ -95,7 +95,7 @@
 
 	<xs:complexType name="links">
 		<xs:sequence>
-			<xs:element name="link">
+			<xs:element name="link" minOccurs="0" maxOccurs="unbounded">
 				<xs:annotation>
 					<xs:documentation>A link to a related item.  These are used to
 						track the source of this item - usually a link into Rally or
@@ -124,41 +124,50 @@
 		</xs:sequence>
 	</xs:complexType>
 
-	<xs:complexType name="story-type">
+	<xs:complexType abstract="true" name="top-level-object">
 		<xs:sequence>
 			<xs:element name="links" type="links" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Links related to this story.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="short-name" type="xs:string"/>
-			<xs:element name="full-name" type="xs:string"/>
-			<xs:element name="identifier" type="xs:string"/>
-			<xs:element ref="description"/>
-			<xs:element name="owner" type="xs:string">
-				<xs:annotation>
-					<xs:documentation>Usually the email address of the owner of this
-						story.  Ownership has a team-defined semantic.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="estimate" type="xs:double">
-				<xs:annotation>
-					<xs:documentation>Complexity estimate for this story.  This is also
-						known as "points" or "value" in various camps.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="state">
-				<xs:simpleType>
-					<xs:restriction base="xs:string">
-						<xs:enumeration value="NOT_STARTED"/>
-						<xs:enumeration value="IN_PROGRESS"/>
-						<xs:enumeration value="COMPLETED"/>
-						<xs:enumeration value="ACCEPTED"/>
-						<xs:enumeration value="BLOCKED"/>
-					</xs:restriction>
-				</xs:simpleType>
-			</xs:element>
 		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="story-type">
+		<xs:complexContent>
+			<xs:extension base="top-level-object">
+				<xs:sequence>
+					<xs:element name="short-name" type="xs:string"/>
+					<xs:element name="full-name" type="xs:string"/>
+					<xs:element name="identifier" type="xs:string"/>
+					<xs:element ref="description"/>
+					<xs:element name="owner" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>Usually the email address of the owner of this
+								story.  Ownership has a team-defined semantic.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="estimate" type="xs:double">
+						<xs:annotation>
+							<xs:documentation>Complexity estimate for this story.  This is also
+								known as "points" or "value" in various camps.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="state">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="NOT_STARTED"/>
+								<xs:enumeration value="IN_PROGRESS"/>
+								<xs:enumeration value="COMPLETED"/>
+								<xs:enumeration value="ACCEPTED"/>
+								<xs:enumeration value="BLOCKED"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
 	</xs:complexType>
 	<xs:element name="story" type="story-type">
 		<xs:annotation>
@@ -174,54 +183,60 @@
 
 	<xs:element name="story-list">
 		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="links" type="links" minOccurs="0"/>
-				<xs:element ref="story" minOccurs="0" maxOccurs="unbounded"/>
-			</xs:sequence>
+			<xs:complexContent>
+				<xs:extension base="top-level-object">
+					<xs:sequence>
+						<xs:element ref="story" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
 		</xs:complexType>
 	</xs:element>
 
 	<xs:complexType name="task-type">
-		<xs:sequence>
-			<xs:element name="links" type="links" minOccurs="0"/>
-			<xs:element name="short-name" type="xs:string"/>
-			<xs:element name="full-name" type="xs:string"/>
-			<xs:element name="identifier" type="xs:string"/>
-			<xs:element name="parent-identifier" type="xs:string"/>
-			<xs:element ref="description"/>
-			<xs:element name="owner" type="xs:string"/>
-			<xs:element name="detailed-estimate" type="xs:double">
-				<xs:annotation>
-					<xs:documentation>The detailed number of hours that this task
-						is expected to take.  This value should not be changed once the
-						iteration has started.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="todo-remaining" type="xs:double">
-				<xs:annotation>
-					<xs:documentation>The remaining number of hours that this task
-						requires before completion.  This value is updated regularly.
-					</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="effort-applied" type="xs:double">
-				<xs:annotation>
-					<xs:documentation>The number of hours that have already been
-						applied to this task.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="state">
-				<xs:simpleType>
-					<xs:restriction base="xs:string">
-						<xs:enumeration value="NOT_STARTED"/>					
-						<xs:enumeration value="IN_PROGRESS"/>					
-						<xs:enumeration value="WAITING"/>					
-						<xs:enumeration value="BLOCKED"/>					
-						<xs:enumeration value="FINISHED"/>					
-					</xs:restriction>
-				</xs:simpleType>
-			</xs:element>
-		</xs:sequence>
+		<xs:complexContent>
+			<xs:extension base="top-level-object">
+				<xs:sequence>
+					<xs:element name="short-name" type="xs:string"/>
+					<xs:element name="full-name" type="xs:string"/>
+					<xs:element name="identifier" type="xs:string"/>
+					<xs:element name="parent-identifier" type="xs:string"/>
+					<xs:element ref="description"/>
+					<xs:element name="owner" type="xs:string"/>
+					<xs:element name="detailed-estimate" type="xs:double">
+						<xs:annotation>
+							<xs:documentation>The detailed number of hours that this task
+								is expected to take.  This value should not be changed once the
+								iteration has started.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="todo-remaining" type="xs:double">
+						<xs:annotation>
+							<xs:documentation>The remaining number of hours that this task
+								requires before completion.  This value is updated regularly.
+							</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="effort-applied" type="xs:double">
+						<xs:annotation>
+							<xs:documentation>The number of hours that have already been
+								applied to this task.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="state">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="NOT_STARTED"/>					
+								<xs:enumeration value="IN_PROGRESS"/>					
+								<xs:enumeration value="WAITING"/>					
+								<xs:enumeration value="BLOCKED"/>					
+								<xs:enumeration value="FINISHED"/>					
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
 	</xs:complexType>
 	<xs:element name="task" type="task-type">
 		<xs:annotation>
@@ -233,10 +248,13 @@
 
 	<xs:element name="task-list">
 		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="links" type="links" minOccurs="0"/>
-				<xs:element ref="task" minOccurs="0" maxOccurs="unbounded"/>
-			</xs:sequence>
+			<xs:complexContent>
+				<xs:extension base="top-level-object">
+					<xs:sequence>
+						<xs:element ref="task" minOccurs="0" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:extension>
+			</xs:complexContent>
 		</xs:complexType>
 	</xs:element>
 

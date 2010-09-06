@@ -3,7 +3,9 @@
 #
 build/
 bin/
-docs/
+docs/api/
+docs/reports/
+docs/schema-docs/
 ext-lib/
 generated-src/
 

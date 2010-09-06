@@ -40,9 +40,12 @@ import standup.connector.HttpClientFactory;
 import standup.connector.UnexpectedResponseException;
 import standup.utility.Utilities;
 import standup.xml.Description;
+import standup.xml.Links;
+import standup.xml.Links.Link;
 import standup.xml.StoryList;
 import standup.xml.StoryType;
 import standup.xml.TaskList;
+import standup.xml.TopLevelObject;
 
 import com.rallydev.xml.ArtifactType;
 import com.rallydev.xml.DefectType;
@@ -61,6 +64,9 @@ public class ServerConnection
 	implements standup.connector.ServerConnection,
 	           org.apache.http.client.CredentialsProvider
 {
+	private static final String RALLY_QUERY_REL = "Rally Query";
+	private static final String RALLY_PARENT_URL_REL = "Parent URL";
+	private static final String RALLY_OBJECT_URL_REL = "Object URL";
 	private static final Logger logger = Logger.getLogger(ServerConnection.class);
 	private static final Pattern ltPattern = Pattern.compile("&lt;");
 	private static final Pattern gtPattern = Pattern.compile("&gt;");
@@ -161,6 +167,7 @@ public class ServerConnection
 			if (artifact != null) {
 				story = this.transformResultInto(StoryType.class, obj);
 				story.setDescription(fixDescription(artifact));
+				addLink(story, obj.getValue().getRef(), RALLY_OBJECT_URL_REL);
 				stories.getStory().add(story);
 			} else {
 				logger.debug(String.format("ignoring DomainObject %d of type %s", domainObj.getObjectID(), stringType));
@@ -203,6 +210,7 @@ public class ServerConnection
 			URI uri = Utilities.createURI(this.host, path, query);
 			QueryResultType result = retrieveURI(QueryResultType.class, uri);
 			processQueryResult(storyList, result);
+			addLink(storyList, uri.toString(), RALLY_QUERY_REL);
 		} catch (JAXBException e) {
 			logger.error("JAXB related error while retrieving multiple stories", e);
 		} catch (TransformerException e) {
@@ -255,6 +263,10 @@ public class ServerConnection
 		TaskList taskList = this.standupFactory.createTaskList();
 		for (StoryType story: stories.getStory()) {
 			String storyID = story.getIdentifier();
+			Link storyLink = findLinkByRel(story, RALLY_OBJECT_URL_REL);
+			if (storyLink != null) {
+				storyLink.setRel(RALLY_PARENT_URL_REL);
+			}
 			try {
 				NDC.push("retrieving tasks for "+story.getIdentifier());
 				logger.debug(NDC.peek());
@@ -263,6 +275,8 @@ public class ServerConnection
 					JAXBElement<TaskType> taskObj = this.retrieveJAXBElement(TaskType.class, new URI(domainObj.getRef()));
 					standup.xml.TaskType task = this.transformResultInto(standup.xml.TaskType.class, taskObj);
 					task.setParentIdentifier(storyID);
+					addLink(task, taskObj.getValue().getRef(), RALLY_OBJECT_URL_REL);
+					addLink(task, storyLink);
 					taskList.getTask().add(task);
 				}
 			} catch (JAXBException e) {
@@ -490,6 +504,39 @@ public class ServerConnection
 			logger.error("failed to unmarshal description <<"+descString+">>", e);
 		}
 		return this.standupFactory.createDescription();
+	}
+
+	private void addLink(TopLevelObject obj, String linkURI, String linkRel) {
+		Link l = this.standupFactory.createLinksLink();
+		l.setOwner(this.getClass().getCanonicalName());
+		l.setValue(linkURI);
+		l.setRel(linkRel);
+		addLink(obj, l);
+	}
+
+	private void addLink(TopLevelObject obj, Link l) {
+		if (l != null) {
+			if (obj.getLinks() == null) {
+				obj.setLinks(this.standupFactory.createLinks());
+			}
+			obj.getLinks().getLink().add(l);
+		}
+	}
+
+	private Link findLinkByRel(TopLevelObject obj, String linkRel) {
+		Links links = obj.getLinks();
+		if (links != null) {
+			for (Link l: links.getLink()) {
+				if (l.getRel().equalsIgnoreCase(linkRel)) {
+					Link cloned = this.standupFactory.createLinksLink();
+					cloned.setOwner(l.getOwner());
+					cloned.setRel(l.getRel());
+					cloned.setValue(l.getValue());
+					return cloned;
+				}
+			}
+		}
+		return null;
 	}
 
 }
