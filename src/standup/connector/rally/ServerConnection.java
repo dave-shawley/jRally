@@ -5,9 +5,7 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -57,6 +55,7 @@ import com.rallydev.xml.TaskType;
 
 /**
  * A connection to the Rally Server.
+ * <p>
  * The connection maintains the authorization information for the
  * session along with the working set of HTTP headers.
  */
@@ -84,6 +83,15 @@ public class ServerConnection
 	private final TransformerFactory xformFactory;
 	private final standup.xml.ObjectFactory standupFactory;
 
+	/**
+	 * Creates a server connection that connects to a specific Rally server.
+	 *
+	 * @param serverName the Rally server instance to connect to
+	 * @param clientFactory the factory to fetch HTTP clients from
+	 * 
+	 * @throws Error when the JAXB context cannot be created.  The underlying
+	 *         {@link JAXBException} is attached as the cause.
+	 */
 	public ServerConnection(String serverName, HttpClientFactory clientFactory)
 	{
 		this.userName = "";
@@ -107,7 +115,7 @@ public class ServerConnection
 	public List<IterationStatus> listIterationsForProject(String project)
 		throws IOException, ClientProtocolException, ConnectorException, JAXBException
 	{
-		QueryResultType result = doQuery("iteration", "Project.Name", "=", project);
+		QueryResultType result = doSimpleQuery("iteration", "Project.Name", project);
 		ArrayList<IterationStatus> iterations = new ArrayList<IterationStatus>(
 				Math.min(result.getPageSize().intValue(),
 						 result.getTotalResultCount().intValue()));
@@ -117,7 +125,8 @@ public class ServerConnection
 			try {
 				iterStatus.iterationURI = new URI(domainObj.getRef());
 			} catch (URISyntaxException e) {
-				logger.error(String.format("iteration %s has invalid URI %s", iterStatus.iterationName, domainObj.getRef()), e);
+				logger.error(String.format("iteration %s has invalid URI %s",
+						iterStatus.iterationName, domainObj.getRef()), e);
 				iterStatus.iterationURI = null;
 			}
 			iterations.add(iterStatus);
@@ -125,15 +134,57 @@ public class ServerConnection
 		return iterations;
 	}
 
+	/**
+	 * Process a Rally <code>QueryResult</code> into a list of user stories.
+	 * <p>
+	 * This is used internally to process most responses.  It will do whatever
+	 * is necessary to build {@link StoryType} objects based on the possibly
+	 * abbreviated response.  Rally responses come in both abbreviated and
+	 * full responses.  This method contains the intelligence to handle either
+	 * response type and build complete object instances from.
+	 * <p>
+	 * A full response contains the full content of each object in the
+	 * response.  The <code>type</code> attribute of the object element
+	 * indicates the actual type of the element.
+	 * <p>
+	 * An abbreviated response only includes the object type, its name, and
+	 * a URI to retrieve the full contents from.  If an abbreviated response
+	 * is encountered, then a separate request is made to retrieve the full
+	 * representation.
+	 * 
+	 * @param stories list to place the user stories into.  Each story is
+	 *                added to the list by calling {@link StoryList#getStory()}
+	 *                and then calling {@link List#add(Object)} on the result.
+	 * @param result  the query result to process.
+	 * 
+	 * @throws ConnectorException when the {@code result} contains one or more
+	 *         errors.  Both errors and warnings will be logged and any errors
+	 *         result in this exception being generated.
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws JAXBException
+ 	 * @throws TransformerException when an XSLT exception is thrown while
+ 	 *         transforming the backend result into the model.
+	 */
 	protected void processQueryResult(StoryList stories, QueryResultType result)
-		throws ClientProtocolException, UnexpectedResponseException, IOException, URISyntaxException, JAXBException, TransformerException
+		throws ClientProtocolException, IOException,
+		       URISyntaxException, JAXBException, TransformerException,
+		       ConnectorException
 	{
 		List<String> errors = result.getErrors().getOperationResultError();
 		if (errors.size() > 0) {
+			int errorCount = errors.size();
 			for (String err: errors) {
 				logger.error(err);
 			}
-			return;
+			if (errorCount == 1) {
+				throw Utilities.generateException(ConnectorException.class,
+						"query resulted in a single error", errors.get(0));
+			}
+			throw Utilities.generateException(ConnectorException.class,
+					String.format("query resulted in %d errors", errorCount),
+					errors);
 		}
 		for (String warning: result.getWarnings().getOperationResultWarning()) {
 			logger.warn(warning);
@@ -180,44 +231,24 @@ public class ServerConnection
 	 */
 	@Override
 	public StoryList retrieveStories(String[] stories)
-		throws IOException, ClientProtocolException, ConnectorException
+		throws IOException, ClientProtocolException, ConnectorException,
+		       TransformerException
 	{
-		StringBuilder builder = new StringBuilder();
-		List<String> segments = new ArrayList<String>(stories.length);
-		for (String storyID: stories) {
-			segments.add(String.format("FormattedID = \"%s\"", storyID));
-			builder.append("(");
-		}
-
-		Iterator<String> iter = segments.iterator();
-		builder.append(iter.next()).append(")");
-		while (iter.hasNext()) {
-			builder.append(" OR (").append(iter.next()).append("))");
-		}
-		if (logger.isDebugEnabled()) logger.debug("query="+builder.toString());
-
 		StoryList storyList = this.standupFactory.createStoryList();
+		String[] segments = new String[stories.length];
+		for (int index=0; index<stories.length; ++index) {
+			segments[index] = String.format("FormattedID = \"%s\"",
+					                        stories[index]);
+		}
+
 		try {
-			URLCodec codec = new URLCodec("US-ASCII");
-			String query = "query="+codec.encode(builder.toString());
-			// + "&fetch=true";
-			// This is not supported yet... each sub-object will result in another
-			// HTTP request.  If the response included xsi:type, then we could
-			// fetch everything in one request and JAXB would correctly detect the
-			// types for us...
-			String path = Utilities.join("/", Constants.RALLY_BASE_RESOURCE,
-					Constants.RALLY_API_VERSION, "artifact");
-			URI uri = Utilities.createURI(this.host, path, query);
+			URI uri = buildQuery("artifact", "OR", segments);
 			QueryResultType result = retrieveURI(QueryResultType.class, uri);
 			processQueryResult(storyList, result);
 			addLink(storyList, uri.toString(), RALLY_QUERY_REL);
 		} catch (JAXBException e) {
 			logger.error("JAXB related error while retrieving multiple stories", e);
-		} catch (TransformerException e) {
-			logger.error("XSLT related error while retrieving multiple stories", e);
 		} catch (URISyntaxException e) {
-			logger.error(e.getClass().getCanonicalName(), e);
-		} catch (EncoderException e) {
 			logger.error(e.getClass().getCanonicalName(), e);
 		}
 		
@@ -229,22 +260,22 @@ public class ServerConnection
 	 */
 	@Override
 	public StoryList retrieveStoriesForIteration(String iteration)
-		throws IOException, ClientProtocolException, ConnectorException
+		throws IOException, ClientProtocolException, ConnectorException,
+		       TransformerException
 	{
 		StoryList storyList = this.standupFactory.createStoryList();
 		try {
 			NDC.push("retrieving stories for iteration "+iteration);
-			QueryResultType result = doQuery("hierarchicalrequirement", "Iteration.Name", "=", iteration);
+			QueryResultType result = doSimpleQuery("hierarchicalrequirement",
+					"Iteration.Name", iteration);
 			processQueryResult(storyList, result);
 			NDC.pop();
 
 			NDC.push("retrieving defects for iteration "+iteration);
-			result = doQuery("defect", "Iteration.Name", "=", iteration);
+			result = doSimpleQuery("defect", "Iteration.Name", iteration);
 			processQueryResult(storyList, result);
 		} catch (JAXBException e) {
 			logger.error("JAXB related error while processing iteration "+iteration, e);
-		} catch (TransformerException e) {
-			logger.error("XSLT related error while processing iteration "+iteration, e);
 		} catch (URISyntaxException e) {
 			logger.error(e.getClass().getCanonicalName(), e);
 		} finally {
@@ -258,7 +289,8 @@ public class ServerConnection
 	 */
 	@Override
 	public TaskList retrieveTasks(StoryList stories)
-		throws IOException, ClientProtocolException, ConnectorException
+		throws IOException, ClientProtocolException, ConnectorException,
+		       TransformerException
 	{
 		TaskList taskList = this.standupFactory.createTaskList();
 		for (StoryType story: stories.getStory()) {
@@ -270,7 +302,7 @@ public class ServerConnection
 			try {
 				NDC.push("retrieving tasks for "+story.getIdentifier());
 				logger.debug(NDC.peek());
-				QueryResultType result = doQuery("task", "WorkProduct.FormattedID", "=", storyID);
+				QueryResultType result = doSimpleQuery("task", "WorkProduct.FormattedID", storyID);
 				for (DomainObjectType domainObj: result.getResults().getObject()) {
 					JAXBElement<TaskType> taskObj = this.retrieveJAXBElement(TaskType.class, new URI(domainObj.getRef()));
 					standup.xml.TaskType task = this.transformResultInto(standup.xml.TaskType.class, taskObj);
@@ -281,8 +313,6 @@ public class ServerConnection
 				}
 			} catch (JAXBException e) {
 				logger.error("JAXB related error while processing story "+storyID, e);
-			} catch (TransformerException e) {
-				logger.error("XSLT related error while processing story "+storyID, e);
 			} catch (URISyntaxException e) {
 				logger.error(e.getClass().getCanonicalName(), e);
 			} finally {
@@ -293,70 +323,22 @@ public class ServerConnection
 	}
 
 	/**
-	 * Constructs a query string according to the Rally Grammar.
+	 * Stores the user name that is sent to the server in response to
+	 * an authorization challenge.  The user name is conventionally the email
+	 * address of the user.
 	 * 
-	 * Rally queries are essentially Attribute OPERATOR Value triples
-	 * strung together with AND and OR.  The expression is fully parenthesized
-	 * according to a very specific grammar.  The following grammar was stolen
-	 * from https://rally1.rallydev.com/slm/doc/webservice/introduction.jsp.
-	 * 
-	 * <table>
-	 * <tr><td>QueryString</td><td>&#x2192;</td><td>( AttributeName SPACE AttributeOperator SPACE AttributeValue )</td></tr>
-	 * <tr><td></td><td></td><td>( AttributePath SPACE AttributeOperator SPACE AttributeValue )</td></tr>
-	 * <tr><td></td><td></td><td>( QueryString SPACE BooleanOperator SPACE QueryString )</td></tr>
-	 * <tr><td>AttributeOperator</td><td>&#x2192;</td><td>=</td></tr>
-	 * <tr><td></td><td></td><td>!=</td></tr>
-	 * <tr><td></td><td></td><td>&gt;</td></tr>
-	 * <tr><td></td><td></td><td>&lt;</td></tr>
-	 * <tr><td></td><td></td><td>&gt;=</td></tr>
-	 * <tr><td></td><td></td><td>&lt;=</td></tr>
-	 * <tr><td></td><td></td><td>contains <i>(NOTE: Starting with version 1.18 the arguments are NOT case sensitive)</i></td></tr>
-	 * <tr><td>BooleanOperator</td><td>&#x2192;</td><td>AND</td></tr>
-	 * <tr><td></td><td></td><td>OR</td></tr>
-	 * <tr><td>AttributeName</td><td>&#x2192;</td><td>The name of the attribute being queried. Name, Notes, etc...</td></tr>
-	 * <tr><td>AttributePath</td><td>&#x2192;</td><td>The path to an attribute. For instance, when querying for tasks that are in a given iteration, it's possible to use the path "Card.Iteration" because Task has a "Card" attribute, and Card has an "Iteration" attribute.</td></tr>
-	 * <tr><td>AttributeValue</td><td>&#x2192;</td><td>Some value. Strings with spaces must be double-quoted (single quotations are not allowed). Object references should be expressed as the REST URI for the object. Use "null" (double quotations optional) to query for a null value in an object reference, integer, decimal or date attribute.</td></tr>
-	 * </table>
-	 * @param joiner TODO
-	 * @param tokens
-	 * 
-	 * @return a properly escaped string for use as an HTTP query string.
-	 * @throws EncoderException
+	 * @param userName the name to present to the server when challenged.
 	 */
-	private String buildQueryString(String... tokens)
-		throws EncoderException
-	{
-		if (tokens.length < 3 || tokens.length%3 != 0) {
-			throw new InvalidParameterException("tokens is a list of triples");
-		}
-
-		String separator = " AND (";
-		StringBuilder builder = new StringBuilder();
-		String querySegments[] = new String[tokens.length / 3];
-		int index = 0;
-		while (index < tokens.length) {
-			querySegments[index/3] = String.format("%s %s \"%s\"",
-					tokens[index], tokens[index+1], tokens[index+2]);
-			index += 3;
-			builder.append("(");
-		}
-
-		index = 0;
-		builder.append(querySegments[index++]).append(")");
-		while (index < querySegments.length) {
-			builder.append(separator)
-			       .append(querySegments[index++])
-			       .append("))");
-		}
-		if (logger.isDebugEnabled()) logger.debug("query="+builder.toString());
-		URLCodec codec = new URLCodec("US-ASCII");
-		return "query="+codec.encode(builder.toString());
-	}
-
 	public void setUsername(String userName) {
 		this.userName = userName;
 	}
 
+	/**
+	 * Stores the password that is sent to the server in response to
+	 * an authentication challenge.
+	 * 
+	 * @param password the password to present to the server when challenged.
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
@@ -393,31 +375,87 @@ public class ServerConnection
 	//=========================================================================
 	// Internal utility methods
 	//
-	private QueryResultType doQuery(String objectType, String... queryParams)
-		throws ClientProtocolException, IOException, ConnectorException, JAXBException
+
+	/**
+	 * Constructs a URI query according to the Rally Grammar.
+	 * <p>
+	 * Rally queries are essentially <code>Attribute OPERATOR Value</code>
+	 * triples strung together with AND and OR.  The expression is fully
+	 * parenthesized according to a very specific grammar described on
+	 * <a href="https://rally1.rallydev.com/slm/doc/webservice/introduction.jsp">
+	 * Rally's Web Service API Introduction</a>.
+	 * <p>
+	 * This method receives the query contents as a list of segments where
+	 * each segment is of the form <code><i>Name</i> <i>op</i> <i>Value</i>
+	 * </code>. The caller is required to insert quotes around <i>Value</i>
+	 * as needed. The Rally query syntax requires double quotes if the value
+	 * contains spaces.  The best bet is to always include them.
+	 * <p>
+	 * The <code>joiner</code> parameter specifies the Boolean operator that
+	 * is used to string together the individual expressions.  The only
+	 * supported operators are <code>AND</code> and <code>OR</code>.
+	 * 
+	 * @param objectType    the type of object to query for
+	 * @param joiner        the operation to join the query segments using
+	 * @param querySegments a list of primitive <code>"name op value"</code>
+	 *                      strings.  See the Rally documentation for supported
+	 *                      names and operators.
+	 * 
+	 * @return the query represented as a Rally URI
+	 * 
+	 * @throws MalformedURLException when a URI object cannot be created using
+	 *         the constructed query
+	 */
+	private URI buildQuery(String objectType, String joiner,
+			               String... querySegments)
+		throws MalformedURLException
 	{
-		String query = null;
+		// The most difficult part of the query syntax is the
+		// parenthesization.  The query syntax is quite rigid in that all
+		// queries are of the form `(LEFT OP RIGHT)` where `LEFT` and `RIGHT`
+		// are either single tokens or full parenthesized expressions.  If
+		// either of the expressions are parenthesized, then both must be.
+		//
+		// So... what follows is an interesting algorithm that builds fully
+		// parenthesized expressions.  Since Java does not include any useful
+		// mechanism for creating strings of repeated characters or building
+		// a string by appending and prefixing a single buffer, we use to
+		// string builders - one for the leading series of parenthesis and
+		// another for the actual query.
+		String separator = String.format(" %s (", joiner);
+		StringBuilder prefixBuilder = new StringBuilder();
+		StringBuilder builder = new StringBuilder();
+		int index = 0;
+
+		prefixBuilder.append("(");
+		builder.append(querySegments[index++]).append(")");
+		while (index < querySegments.length) {
+			prefixBuilder.append("(");
+			builder.append(separator).append(querySegments[index++]).append("))");
+		}
+		String query = prefixBuilder.toString() + builder.toString();
 		String path = Utilities.join("/", Constants.RALLY_BASE_RESOURCE,
 				Constants.RALLY_API_VERSION, objectType);
 		try {
-			query = buildQueryString(queryParams);
-			URI uri = Utilities.createURI(this.host, path, query);
-			return retrieveURI(QueryResultType.class, uri);
-		} catch (URISyntaxException e) {
-			// Thrown by createURI if some portion of the URI is invalid.
-			// Convert this to a MalformedURLException as well.
-			throw Utilities.generateException(MalformedURLException.class, e,
-					"failed to build URL", "object type", objectType, "query was", query);
+			URLCodec codec = new URLCodec("US-ASCII");
+			return Utilities.createURI(this.host, path,
+					"query="+codec.encode(query));
 		} catch (EncoderException e) {
-			// Thrown by buildQueryString if the string cannot be encoded
-			// by the URLCodec.  Convert this to a MalformedURLException.
-			//
-			// XXX if you really want to test this, the only way to get it
-			//     to fire is to change the character set used by the URLCodec
-			//     in buildQueryString to something unrecognized.
 			throw Utilities.generateException(MalformedURLException.class, e,
-					"failed to build query string for", (Object[])queryParams);
+					"failed to encode URL", "object type", objectType,
+					"query was", query);
+		} catch (URISyntaxException e) {
+			throw Utilities.generateException(MalformedURLException.class, e,
+					"failed to build URL", "object type", objectType,
+					"query was", query);
 		}
+	}
+
+	private QueryResultType doSimpleQuery(String objectType, String attributeName, String attributeValue) throws ClientProtocolException, UnexpectedResponseException, MalformedURLException, IOException {
+		return retrieveURI(QueryResultType.class,
+				           buildQuery(objectType, "AND",
+				        		     String.format("%s = \"%s\"",
+				        		    		       attributeName, attributeValue)));
 	}
 
 	@Override

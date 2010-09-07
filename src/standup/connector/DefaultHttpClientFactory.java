@@ -1,6 +1,3 @@
-/**
- * 
- */
 package standup.connector;
 
 import org.apache.http.client.CredentialsProvider;
@@ -8,26 +5,27 @@ import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 /**
- * TODO Describe HttpClientFactory.
+ * Implements a vanilla HTTP client factory.
+ * 
+ * This class provides the most basic factory implementation.  I had plans on
+ * creating peer classes to implement pooled connections but have yet to need
+ * such a factory. 
  */
 public class DefaultHttpClientFactory implements HttpClientFactory {
 
 	/* (non-Javadoc)
 	 * @see standup.connector.HttpClientFactory#getHttpClient()
 	 */
+	@Override
 	public AbstractHttpClient getHttpClient() {
-		// TODO figure out how to make this work
-		//HttpParams params = new BasicHttpParams();
-		//params.setParameter(ClientPNames.CONNECTION_MANAGER_FACTORY_CLASS_NAME,
-		//		"org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager");
 		DefaultHttpClient httpClient = new DefaultHttpClient();
-		//httpClient.setParams(new DefaultedHttpParams(params, httpClient.getParams()));
 		return httpClient;
 	}
 
 	/* (non-Javadoc)
 	 * @see standup.connector.HttpClientFactory#getHttpClient(org.apache.http.client.CredentialsProvider)
 	 */
+	@Override
 	public AbstractHttpClient getHttpClient(CredentialsProvider credentials) {
 		AbstractHttpClient httpClient = getHttpClient();
 		httpClient.setCredentialsProvider(credentials);

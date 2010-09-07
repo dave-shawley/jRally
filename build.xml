@@ -4,7 +4,6 @@
   name="jRally"
 	default="compile">
 
-	<property name="package.name" value="standup.rally"/>
 	<property file="local.properties"/>
 
 	<!--
@@ -122,14 +121,18 @@
 		description="===> generate API documentation">
 		<mkdir dir="${javadoc.dir}"/>
 		<javadoc
-			sourcepath="${src.dir}" destdir="${javadoc.dir}"
-			private="true">
-			<classpath refid="build.classpath"/>
-			<group title="Entity Model" packages="${package.name}.model"/>
-			<group title="Representations" packages="${package.name}.xml"/>
+			destdir="${javadoc.dir}"
+			private="true"
+			sourcepath="${src.dir}:${generated.src.dir}"
+			classpathref="build.classpath">
+			<group title="Application Entry Points" packages="standup.application"/>
+			<group title="Domain Model" packages="standup.xml"/>
+			<group title="Connectors" packages="standup.connector:standup.connector.*"/>
+			<group title="Rally Web Service API" packages="com.rallydev.*"/>
 			<group title="Tests" packages="tests:tests.*"/>
 			<link href="http://java.sun.com/javase/6/docs/api/"/>
 			<link href="http://java.sun.com/javaee/6/docs/api/"/>
+			<link href="http://hc.apache.org/httpcomponents-client/httpclient/apidocs/"/>
 		</javadoc>
 	</target>
 
