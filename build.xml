@@ -14,13 +14,14 @@
 		available using Ivy so we are forced to bundle them statically.
 	-->
 	<property name="src.dir" location="src"/>
+	<property name="test.src.dir" location="test"/>
+	<property name="generated.src.dir" location="generated-src"/>
 	<property name="config.dir" location="configs"/>
 	<property name="lib.dir" location="local-lib"/>
 	<property name="ivy.lib.dir" location="ext-lib"/>
 	<property name="tools.dir" location="tools"/>
 	<property name="docs.dir" location="docs"/>
 	<property name="schemas.dir" value="${docs.dir}/schemas"/>
-	<property name="generated.src.dir" location="generated-src"/>
 
 	<!--
 		This set of properties controls the locations of intermediate files.  These are used
@@ -154,6 +155,7 @@
 			<classpath>
 				<output path="${classes.dir}"/>
 				<source path="${src.dir}"/>
+				<source path="${test.src.dir}"/>
 				<source path="${generated.src.dir}"/>
 				<library path="ext-lib/jdom-1.1.1.jar"
 					javadoc="http://www.jdom.org/docs/apidocs/"/>
