@@ -1,4 +1,4 @@
-package tests;
+package standup.connector.rally;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,8 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import standup.connector.ServerConnection.IterationStatus;
+import standup.connector.StubClientFactory;
 import standup.connector.UnexpectedResponseException;
-import standup.connector.rally.ServerConnection;
 import standup.xml.StoryList;
 import standup.xml.StoryType;
 

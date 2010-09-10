@@ -21,7 +21,8 @@
 	<property name="ivy.lib.dir" location="ext-lib"/>
 	<property name="tools.dir" location="tools"/>
 	<property name="docs.dir" location="docs"/>
-	<property name="schemas.dir" value="${docs.dir}/schemas"/>
+	<property name="schemas.dir" value="${src.dir}/schemas"/>
+	<property name="xsl.dir" value="${src.dir}/xslt"/>
 
 	<!--
 		This set of properties controls the locations of intermediate files.  These are used
@@ -36,6 +37,8 @@
 	-->
 	<property name="build.dir" location="build"/>
 	<property name="classes.dir" value="${build.dir}/classes"/>
+	<property name="test.classes.dir" value="${build.dir}/test-classes"/>
+	<property name="eclipse.build.dir" value="${build.dir}/eclipse"/>
 	<property name="jar.dir" value="${build.dir}/jar"/>
 	<property name="test.jar.dir" value="${build.dir}/test-jar"/>
 	<property name="war.dir" value="${build.dir}/war"/>
@@ -125,7 +128,8 @@
 			destdir="${javadoc.dir}"
 			private="true"
 			sourcepath="${src.dir}:${generated.src.dir}"
-			classpathref="build.classpath">
+			classpathref="build.classpath"
+			overview="${docs.dir}/overview.html">
 			<group title="Application Entry Points" packages="standup.application"/>
 			<group title="Domain Model" packages="standup.xml"/>
 			<group title="Connectors" packages="standup.connector:standup.connector.*"/>
@@ -146,6 +150,10 @@
 		</xslt>
 	</target>
 
+	<target name="docs"
+		description="===> build all documentation"
+		depends="schema-docs,api-docs"/>
+
 	<target name="eclipse"
 		description="===> generate an Eclipse project">
 		<mkdir dir="${generated.src.dir}"/>
@@ -153,14 +161,13 @@
 		<eclipse mode="java" updatealways="true">
 			<project name="${ant.project.name}"/>
 			<classpath>
-				<output path="${classes.dir}"/>
+				<output path="${eclipse.build.dir}/classes"/>
 				<source path="${src.dir}"/>
-				<source path="${test.src.dir}"/>
-				<source path="${generated.src.dir}"/>
+				<source path="${test.src.dir}" output="${eclipse.build.dir}/tests"/>
+				<source path="${generated.src.dir}" output="${eclipse.build.dir}/generated"/>
 				<library path="ext-lib/jdom-1.1.1.jar"
 					javadoc="http://www.jdom.org/docs/apidocs/"/>
 				<library pathref="default.classpath"/>
-				<library path="${docs.dir}"/>
 				<library path="${config.dir}"/>
 			</classpath>
 		</eclipse>
@@ -169,7 +176,6 @@
 	<target name="compile"
 		description="===> compile all classes"
 		depends="xml-sources">
-		<mkdir dir="${ivy.lib.dir}"/>
 		<mkdir dir="${classes.dir}"/>
 		<javac target="1.6" debug="true"
 			destdir="${classes.dir}" includeantruntime="false">
@@ -184,24 +190,32 @@
 		depends="compile">
 		<mkdir dir="${jar.dir}"/>
 		<jar destfile="${jar.path}" basedir="${jar.dir}">
-			<fileset dir="${classes.dir}">
-				<exclude name="**/*.swp"/>
-				<exclude name="tests/**/*.class"/>
-			</fileset>
+			<fileset dir="${classes.dir}" includes="**/*.class"/>
 			<fileset dir="${config.dir}" includes="*.properties"/>
 			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
-			<zipfileset dir="${config.dir}/xslt" prefix="xslt"/>
+			<zipfileset dir="${xsl.dir}" prefix="xslt"/>
 		</jar>
+	</target>
+
+	<target name="compile-tests"
+		description="===> compile the test code"
+		depends="compile">
+		<mkdir dir="${test.classes.dir}"/>
+		<javac target="1.6" debug="true"
+			destdir="${test.classes.dir}" includeantruntime="false">
+			<src path="${test.src.dir}"/>
+			<classpath refid="build.classpath"/>
+			<classpath path="${classes.dir}"/>
+		</javac>
 	</target>
 
 	<target name="test-jar"
 		description="===> build the jar contain unit tests and test data"
-		depends="compile">
+		depends="compile-tests">
 		<mkdir dir="${test.jar.dir}"/>
 		<jar destfile="${test.jar.path}" basedir="${test.jar.dir}">
-			<fileset dir="${classes.dir}" includes="tests/**/*.class"/>
-			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
-			<zipfileset dir="${config.dir}/test-data" prefix="test-data"/>
+			<fileset dir="${test.classes.dir}" includes="**/*.class"/>
+			<zipfileset dir="${test.src.dir}/test-data" prefix="test-data"/>
 		</jar>
 	</target>
 
@@ -247,7 +261,7 @@
 			</instr>
 		</emma>
 		
-		<junit printsummary="true" fork="true">
+		<junit printsummary="true" fork="true" forkmode="once">
 			<formatter type="plain"/>
 			<formatter type="xml"/>
 			<classpath>
@@ -256,7 +270,7 @@
 				<path refid="emma.path"/>
 			</classpath>
 			<batchtest fork="yes" todir="${junit.report.dir}">
-				<fileset dir="${src.dir}" includes="tests/**/*Test.java"/>
+				<fileset dir="${test.src.dir}" includes="**/*Test.java"/>
 			</batchtest>
 			<jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma"/>
 			<jvmarg value="-Demma.coverage.out.merge=true"/>

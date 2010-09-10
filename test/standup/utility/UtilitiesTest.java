@@ -1,4 +1,4 @@
-package tests;
+package standup.utility;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -16,8 +16,6 @@ import javax.xml.transform.sax.SAXResult;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.junit.Test;
-
-import standup.utility.Utilities;
 
 
 public class UtilitiesTest

@@ -1,6 +1,7 @@
-package tests;
+package standup.utility;
 
-public class SimpleException extends Exception {
+class SimpleException extends Exception {
+	private static final long serialVersionUID = 594341759526899330L;
 	public enum Flags { THROW_ERROR; }
 	public SimpleException(String msg) {
 		super(msg);

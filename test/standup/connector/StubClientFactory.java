@@ -1,4 +1,4 @@
-package tests;
+package standup.connector;
 
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;

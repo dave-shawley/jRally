@@ -3,7 +3,6 @@ package standup.connector;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.AbstractHttpClient;
 
-import tests.StubClientFactory;
 
 /**
  * Simple HTTP client factory.
