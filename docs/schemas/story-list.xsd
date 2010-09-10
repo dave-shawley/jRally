@@ -78,6 +78,27 @@
 		</xs:choice>
 	</xs:group>
 
+	<xs:complexType name="out-of-line-element" mixed="true">
+		<xs:group ref="inline-elements" minOccurs="0" maxOccurs="unbounded"/>
+	</xs:complexType>
+
+	<xs:complexType name="formatting-element" mixed="true">
+		<xs:group ref="all-formatting-elements" minOccurs="0" maxOccurs="unbounded"/>
+	</xs:complexType>
+
+	<xs:group name="all-formatting-elements">
+		<xs:choice>
+			<xs:element name="p" type="formatting-element"/>
+			<xs:element name="div" type="formatting-element"/>
+			<xs:element name="ul" type="simple-list"/>
+			<xs:element name="ol" type="simple-list"/>
+			<xs:element name="br"/>
+			<xs:element name="i" type="formatting-element"/>
+			<xs:element name="b" type="formatting-element"/>
+			<xs:element name="tt" type="formatting-element"/>
+		</xs:choice>
+	</xs:group>
+
 	<xs:element name="description">
 		<xs:annotation>
 			<xs:documentation>A description gets its own top-level element so
@@ -88,8 +109,8 @@
 				can create a proper element.  This is the only reason that this
 				is a top-level element.</xs:documentation>
 		</xs:annotation>
-		<xs:complexType>
-			<xs:group ref="block-elements" minOccurs="0" maxOccurs="unbounded"/>
+		<xs:complexType mixed="true">
+			<xs:group ref="all-formatting-elements" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:complexType>
 	</xs:element>
 

@@ -528,9 +528,6 @@ public class ServerConnection
 		descString = nbspPattern.matcher(descString).replaceAll(" ");	// &nbsp; -> " "
 		descString = brPattern.matcher(descString).replaceAll("<br/>");	// <br> -> <br/>
 		descString = ampPattern2.matcher(descString).replaceAll("&amp;"); // & -> &amp;
-		if (!descString.startsWith("<p>")) {
-			descString = String.format("<p>%s</p>", descString);
-		}
 		descString = String.format("<description>%s</description>", descString);
 
 		try {

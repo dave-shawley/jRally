@@ -232,7 +232,7 @@
 
 	<target name="test"
 		description="===> run the test classes"
-		depends="jar">
+		depends="jar, test-jar">
 		<mkdir dir="${junit.report.dir}"/>
 		
 		<emma enabled="${emma.enabled}">
