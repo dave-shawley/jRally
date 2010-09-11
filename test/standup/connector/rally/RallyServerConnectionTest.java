@@ -1,11 +1,14 @@
 package standup.connector.rally;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
+
+import javax.xml.bind.UnmarshalException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.AuthScope;
@@ -165,12 +168,26 @@ public class RallyServerConnectionTest {
 	@Test(expected=UnexpectedResponseException.class)
 	public void stubUnexpectedXml() throws Exception {
 		factory.setNextResponse(200, "<?xml version='1.0'?><some-document/>");
-		conn.listIterationsForProject(PROJECT_NAME);
+		conn.retrieveStoriesForIteration(ACTIVE_ITERATION_NAME);
 	}
 
+	@Test
+	public void testRetrieveIterationWithInvalidURL() throws Exception {
+		try {
+			factory.setNextResponse(200, getResourceAsString("test-data/iteration-with-invalid-url.xml"));
+			conn.listIterationsForProject(PROJECT_NAME);
+		} catch (UnexpectedResponseException exc) {
+			Throwable cause = exc.getCause();
+			assertTrue(cause instanceof UnmarshalException);
+		}
+	}
+
+	//
 	// Utility functions
+	//
 	protected String getResourceAsString(String resourceName) throws IOException {
 		return IOUtils.toString(ClassLoader.getSystemResourceAsStream(resourceName));
 	}
+
 }
 

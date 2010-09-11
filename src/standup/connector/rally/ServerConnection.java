@@ -167,7 +167,7 @@ public class ServerConnection
  	 * @throws TransformerException when an XSLT exception is thrown while
  	 *         transforming the backend result into the model.
 	 */
-	protected void processQueryResult(StoryList stories, QueryResultType result)
+	void processQueryResult(StoryList stories, QueryResultType result)
 		throws ClientProtocolException, IOException,
 		       URISyntaxException, JAXBException, TransformerException,
 		       ConnectorException
@@ -406,8 +406,7 @@ public class ServerConnection
 	 * @throws MalformedURLException when a URI object cannot be created using
 	 *         the constructed query
 	 */
-	private URI buildQuery(String objectType, String joiner,
-			               String... querySegments)
+	URI buildQuery(String objectType, String joiner, String... querySegments)
 		throws MalformedURLException
 	{
 		// The most difficult part of the query syntax is the
@@ -451,7 +450,7 @@ public class ServerConnection
 		}
 	}
 
-	private QueryResultType doSimpleQuery(String objectType, String attributeName, String attributeValue) throws ClientProtocolException, UnexpectedResponseException, MalformedURLException, IOException {
+	QueryResultType doSimpleQuery(String objectType, String attributeName, String attributeValue) throws ClientProtocolException, UnexpectedResponseException, MalformedURLException, IOException {
 		return retrieveURI(QueryResultType.class,
 				           buildQuery(objectType, "AND",
 				        		     String.format("%s = \"%s\"",
@@ -466,7 +465,7 @@ public class ServerConnection
 		return jaxbElm.getValue();
 	}
 
-	protected <T> JAXBElement<T> retrieveJAXBElement(Class<T> klass, URI uri)
+	<T> JAXBElement<T> retrieveJAXBElement(Class<T> klass, URI uri)
 		throws ClientProtocolException, IOException, UnexpectedResponseException
 	{
 		logger.debug(String.format("retrieving %s from %s", klass.toString(), uri.toString()));
@@ -498,7 +497,7 @@ public class ServerConnection
 		}
 	}
 
-	protected <T,U> U transformResultInto(Class<U> klass, T result)
+	<T,U> U transformResultInto(Class<U> klass, T result)
 		throws JAXBException, TransformerException, UnexpectedResponseException
 	{
 		JAXBResult resultDoc = Utilities.runXSLT(new JAXBResult(this.jaxb),
@@ -520,7 +519,7 @@ public class ServerConnection
 				"got",resultType);
 	}
 
-	protected Description fixDescription(ArtifactType artifact) {
+	Description fixDescription(ArtifactType artifact) {
 		String descString = artifact.getDescription();
 		descString = ltPattern.matcher(descString).replaceAll("<");		// &lt; -> "<"
 		descString = gtPattern.matcher(descString).replaceAll(">");		// &gt; -> ">"
