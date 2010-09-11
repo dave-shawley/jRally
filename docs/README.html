@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<title>jRally - Rally Integration for Java</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 5196 2007-06-03 20:25:28Z wiemann $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left {
+  clear: left }
+
+img.align-right {
+  clear: right }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font-family: serif ;
+  font-size: 100% }
+
+pre.literal-block, pre.doctest-block {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document" id="jrally-rally-integration-for-java">
+<h1 class="title">jRally - Rally Integration for Java</h1>
+
+<p>This project is a simple Java interface to the <a class="reference external" href="http://www.rallydev.com/">Rally</a> Agile Project
+Management tool.  We have been using Rally for a little while at work
+and I find it's user interface quite nice from a browser but difficult
+to do anything useful with from a mobile device.  Since my carrier does
+not support the iPhone, I am stuck with an Google Android derived phone
+and there is not a decent Rally client for it.  To make a long story
+relatively short, I decided to write one and this project is the work
+in progress towards that goal.</p>
+<p>I am relatively new to writing releasable Java programs beyond simple
+utilities so expect to see some relatively non-standard coding styles as
+I get beaten into submission by the JVM.  One of the main purposes of this
+project is to help me firm up <em>best practices</em> before I go and call myself
+a Java programmer.  So you can expect a lot of directory reorganization and
+complete changes in idioms used and what not.  I am going to try to capture
+various approaches that I am taking in this file so that you at least have
+some sort of a trail guide.</p>
+<p>This is also my first play at using <a class="reference external" href="http://gitscm.org/">git</a> and <a class="reference external" href="http://github.com/dave-shawley/jRally">github</a> for source control.
+I am a long-time <a class="reference external" href="http://subversion.apache.org/">Subversion</a> user so a distributed SCM is a bit of a
+switch.</p>
+<div class="section" id="build-instructions">
+<h1>Build Instructions</h1>
+<p>This part of the project isn't quite as clean as I would like, but it will
+have to do for now.  The process is currently driven from <cite>build.xml</cite>.
+This is a free-standing Ant script.  You will need to download and install
+a few things first:</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://ant.apache.org/bindownload.cgi">Apache Ant</a> 1.8.0 or newer</li>
+<li><a class="reference external" href="http://ant.apache.org/ivy/download.cgi">Apache Ivy</a> 2.1 or newer</li>
+<li><a class="reference external" href="http://emma.sourceforge.net/downloads.html">Emma</a> 2.0 or newer</li>
+<li>A fairly recent version of <a class="reference external" href="http://eclipse.org/downloads/">Eclipse</a>, I've been using Galileo (3.5.2)</li>
+</ol>
+<p>Once you have these installed, you should be able to run:</p>
+<pre class="literal-block">
+jRally$ ant -p
+Buildfile: /Users/daveshawley/src/jRally/build.xml
+
+Main targets:
+
+ api-docs       ===&gt; generate API documentation
+ bootstrap      ===&gt; update external dependencies, compile schemas, etc.
+ clean          ===&gt; removes intermediate generated files
+ compile        ===&gt; compile all classes
+ compile-tests  ===&gt; compile the test code
+ dist-clean     ===&gt; remove all non-repository files
+ docs           ===&gt; build all documentation
+ eclipse        ===&gt; generate an Eclipse project
+ emma           ===&gt; enable Emma by mixing this in
+ jar            ===&gt; build a JAR of all classes
+ real-clean     ===&gt; remove all generated files
+ run            ===&gt; run the command-line application
+ schema-docs    ===&gt; generate XML Schema documentation
+ test           ===&gt; run the test classes
+ test-jar       ===&gt; build the jar contain unit tests and test data
+ update-ivy     ===&gt; retrieve dependencies
+ xml-sources    ===&gt; generate JAXB sources from the schemas
+Default target: compile
+jRally$
+</pre>
+<p>If you get this far, then everything is probably set up correctly.  Execute
+the <cite>bootstrap</cite> target.  This will fetch a bunch of libraries from various
+Ivy and Maven repositories - expect this to take 5 or 6 minutes.  Then it
+will generate some XML bindings.  Finally, it will generate an Eclipse
+workspace for the whole mess.</p>
+<p>Once the bootstrapping is complete, you can import the workspace into
+Eclipse or continue to work from the ant script.  The <cite>jar</cite> target will
+compile everything into <cite>bin/jRally.jar</cite>.  There is not currently a Main
+Class set in the jar, so you will have to call the class name directly.
+There are a few <em>main</em> classes embedded in the jar currently.</p>
+</div>
+<div class="section" id="running">
+<h1>Running</h1>
+<p>There are two main classes implemented.  Both are buried in the
+<cite>standup.application</cite> package:</p>
+<dl class="docutils">
+<dt><strong>RetrieveStoriesByID</strong></dt>
+<dd>Fetch stories and defects using their Rally IDs (e.g., US1234, DE42)</dd>
+<dt><strong>RetrieveStoriesForIteration</strong></dt>
+<dd>Fetch all of the stories and defects associated with an iteration</dd>
+</dl>
+<p>Both classes implement a basic CLI using some goodies from Apache Commons
+for command line parsing.  The core of the CLI is in the <cite>RetrieveStories</cite>
+class (I know, my class naming skills are astounding).  It implements a
+common set of command line options and some common processing as well.  The
+following command line options are supported by both CLI applications:</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">--help</span></kbd></td>
+<td>show this help summary</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--password <var>PASSWORD</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>use this password when connecting to Rally</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--story-file <var>FILE</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>use this name for the story cards PDF</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--task-file <var>FILE</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>use this name for the task cards PDF</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--user <var>USER</var></span></kbd></td>
+<td>connect to Rally with the user name USER</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--verbose</span></kbd></td>
+<td>show debug diagnostics</td></tr>
+</tbody>
+</table>
+<p>If you specify a tasks file, then the application will fetch the stories
+and then all of the tasks associated with them.  If you don't specify one,
+then only the stories are fetched.</p>
+</div>
+<div class="section" id="directory-layout">
+<h1>Directory Layout</h1>
+<p>I use a directory structure that smears the style used by some Apache projects
+and the style espoused by Sun (now Oracle) in their examples.  There doesn't
+seem to be a real consensus in the community about project layouts.  Not to
+mention that I seem to have chosen a handful of technologies that don't seem
+to be used together very often.  So as any good programmer would do, I gone
+off and created something of my own.  At least I am going to describe it here.</p>
+<blockquote>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="66%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>README.rst</td>
+<td>Used by <a class="reference external" href="http://github.com/dave-shawley/jRally">github</a> as the overview documentation
+for the project.  I convert this to html and
+store it in the <em>docs</em> directory so that
+people who are not familiar with reStructured
+Text can read it easily.</td>
+</tr>
+<tr><td>build.xml</td>
+<td>Ant build script</td>
+</tr>
+<tr><td>configs/</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>docs/</td>
+<td>Root of various documentation both generated
+and static.</td>
+</tr>
+<tr><td>docs/overview.html</td>
+<td>HTML file that is used as the overview file
+in the Javadoc when it is generated.</td>
+</tr>
+<tr><td>docs/README.html</td>
+<td><em>README.rst</em> converted into HTML</td>
+</tr>
+<tr><td>ext-lib/</td>
+<td>External libraries imported by Ivy are stored
+here.  This directory is empty by default.</td>
+</tr>
+<tr><td>ivy.xml</td>
+<td>Ivy description of this projects dependencies</td>
+</tr>
+<tr><td>ivysettings.xml</td>
+<td>Ivy configuration of repositories that it can
+pull dependencies from.</td>
+</tr>
+<tr><td>local-lib/</td>
+<td>Libraries used by the project at runtime that
+are not easy to find via Ivy.</td>
+</tr>
+<tr><td>src/</td>
+<td>Root of all source code. I put everything in
+subdirectories of this tree.</td>
+</tr>
+<tr><td>src/main/</td>
+<td>Source code that goes into the main JAR file.
+This is where the meat of the application is.
+Other directories contain application hooks
+and other extensions of the base code.</td>
+</tr>
+<tr><td>src/main/schemas/</td>
+<td>XSD files that describe the Rally API that is
+used along with the intermediate XML
+representation.</td>
+</tr>
+<tr><td>src/main/xslt/</td>
+<td>XSL transforms that create the intermediate
+XML based on the Rally responses as well as
+generate XSL-FO output from the intermediate.</td>
+</tr>
+<tr><td>src/test/</td>
+<td><em>JUnit tests.</em>  This subtree mimics the other
+trees so that test code resides in the same
+package as the code that it is testing.  This
+makes it possible to test non-public members
+by giving them package visibility.</td>
+</tr>
+<tr><td>src/test/test-data/</td>
+<td>XML files that are used as canned-responses
+for the JUnit tests.</td>
+</tr>
+<tr><td>tools/</td>
+<td>Utilities used during the build process.
+Most of the tools are not used at runtime.
+One exception is the JAXB jars.  The XJC task
+is used to convert XSDs in the source tree
+into Java classes.  They are also required at
+runtime.</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+</div>
+</div>
+</body>
+</html>

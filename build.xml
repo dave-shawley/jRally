@@ -13,8 +13,8 @@
 		ivy.lib.dir is downloaded by Ivy.  Lib.dir contains libraries that are not currently
 		available using Ivy so we are forced to bundle them statically.
 	-->
-	<property name="src.dir" location="src"/>
-	<property name="test.src.dir" location="test"/>
+	<property name="src.dir" location="src/main"/>
+	<property name="test.src.dir" location="src/test"/>
 	<property name="generated.src.dir" location="generated-src"/>
 	<property name="config.dir" location="configs"/>
 	<property name="lib.dir" location="local-lib"/>
@@ -26,9 +26,7 @@
 
 	<!--
 		This set of properties controls the locations of intermediate files.  These are used
-		to store compiled classes and stage other intermediates as necessary.  For example,
-		the jar.dir and war.dir directories are used to stage directory structures required
-		by the <jar> and <war> tasks.
+		to store compiled classes and stage other intermediates as necessary.
 		
 		Currently all of the intermediates are located under build.dir.  The `clean' target
 		removes all intermediate files by simply removing this directory.  If any intermediate
@@ -39,8 +37,6 @@
 	<property name="classes.dir" value="${build.dir}/classes"/>
 	<property name="test.classes.dir" value="${build.dir}/test-classes"/>
 	<property name="eclipse.build.dir" value="${build.dir}/eclipse"/>
-	<property name="jar.dir" value="${build.dir}/jar"/>
-	<property name="test.jar.dir" value="${build.dir}/test-jar"/>
 	<property name="war.dir" value="${build.dir}/war"/>
 	<property name="coverage.dir" value="${build.dir}/coverage"/>
 	<!-- This is not defined here, read the comments above the "emma" target -->
@@ -188,8 +184,7 @@
 	<target name="jar"
 		description="===> build a JAR of all classes"
 		depends="compile">
-		<mkdir dir="${jar.dir}"/>
-		<jar destfile="${jar.path}" basedir="${jar.dir}">
+		<jar destfile="${jar.path}" basedir="${classes.dir}">
 			<fileset dir="${classes.dir}" includes="**/*.class"/>
 			<fileset dir="${config.dir}" includes="*.properties"/>
 			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
@@ -212,8 +207,7 @@
 	<target name="test-jar"
 		description="===> build the jar contain unit tests and test data"
 		depends="compile-tests">
-		<mkdir dir="${test.jar.dir}"/>
-		<jar destfile="${test.jar.path}" basedir="${test.jar.dir}">
+		<jar destfile="${test.jar.path}" basedir="${test.classes.dir}">
 			<fileset dir="${test.classes.dir}" includes="**/*.class"/>
 			<zipfileset dir="${test.src.dir}/test-data" prefix="test-data"/>
 		</jar>
