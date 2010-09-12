@@ -1,6 +1,7 @@
 package standup.connector;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -10,6 +11,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.StatusLine;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -17,8 +22,6 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestExecutor;
-
-import standup.connector.HttpClientFactory;
 
 
 class StubHttpRequestExecutor extends HttpRequestExecutor {
@@ -83,6 +86,18 @@ public class StubClientFactory implements HttpClientFactory {
 		AbstractHttpClient client = getHttpClient();
 		client.setCredentialsProvider(credentials);
 		return client;
+	}
+
+	@Override
+	public HttpUriRequest getRequestObject(String httpMethod, URI uri) {
+		if (httpMethod.equalsIgnoreCase(HttpGet.METHOD_NAME)) {
+			return new HttpGet(uri);
+		} else if (httpMethod.equalsIgnoreCase(HttpPost.METHOD_NAME)) {
+			return new HttpPost(uri);
+		} else if (httpMethod.equalsIgnoreCase(HttpDelete.METHOD_NAME)) {
+			return new HttpDelete(uri);
+		}
+		return null;
 	}
 
 }

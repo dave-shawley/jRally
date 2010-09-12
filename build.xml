@@ -36,7 +36,7 @@
 	<property name="build.dir" location="build"/>
 	<property name="classes.dir" value="${build.dir}/classes"/>
 	<property name="test.classes.dir" value="${build.dir}/test-classes"/>
-	<property name="eclipse.build.dir" value="${build.dir}/eclipse"/>
+	<property name="eclipse.build.dir" value="build/eclipse"/> <!-- this is required to be relative -->
 	<property name="war.dir" value="${build.dir}/war"/>
 	<property name="coverage.dir" value="${build.dir}/coverage"/>
 	<!-- This is not defined here, read the comments above the "emma" target -->
@@ -223,7 +223,6 @@
 		description="===> remove all generated files"
 		depends="clean">
 		<delete dir="${output.dir}" deleteonexit="true"/>
-		<delete dir="${generated.src.dir}" deleteonexit="true"/>
 		<delete dir="${javadoc.dir}" deleteonexit="true"/>
 		<delete dir="${report.dir}" deleteonexit="true"/>
 		<delete dir="${schema.docs.dir}" deleteonexit="true"/>
@@ -232,6 +231,7 @@
 	<target name="dist-clean"
 		description="===> remove all non-repository files"
 		depends="real-clean">
+		<delete dir="${generated.src.dir}" deleteonexit="true"/>
 		<delete file="${basedir}/.project" deleteonexit="true"/>
 		<delete file="${basedir}/.classpath" deleteonexit="true"/>
 		<delete dir="${basedir}/.settings" deleteonexit="true"/>

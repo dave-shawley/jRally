@@ -1,6 +1,9 @@
 package standup.connector;
 
+import java.net.URI;
+
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.AbstractHttpClient;
 
 
@@ -13,6 +16,15 @@ import org.apache.http.impl.client.AbstractHttpClient;
  * abstraction.
  */
 public interface HttpClientFactory {
+
+	/**
+	 * Retrieve an HTTP request object.
+	 * 
+	 * @param httpMethod
+	 * @param uri
+	 */
+	public abstract HttpUriRequest getRequestObject(String httpMethod, URI uri);
+
 	/**
 	 * Retrieve a default client.
 	 * @return An HTTP client using the default parameters for this factory.
@@ -26,4 +38,5 @@ public interface HttpClientFactory {
 	 *         and the specified credential store.
 	 */
 	public abstract AbstractHttpClient getHttpClient(CredentialsProvider credentials);
+
 }

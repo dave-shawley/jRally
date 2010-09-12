@@ -14,8 +14,8 @@ import org.apache.commons.cli.Parser;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import standup.connector.DefaultHttpClientFactory;
 import standup.connector.rally.Constants;
+import standup.connector.rally.RallyClientFactory;
 import standup.connector.rally.ServerConnection;
 import standup.xml.StoryList;
 import standup.xml.StoryType;
@@ -98,7 +98,7 @@ public abstract class RetrieveStories {
 		}
 
 		ServerConnection rallyServer = new ServerConnection(
-				Constants.RALLY_SERVER_NAME, new DefaultHttpClientFactory());
+				Constants.RALLY_SERVER_NAME, new RallyClientFactory());
 		rallyServer.setUsername(parsedCmdLine.getOptionValue(USER_KEY));
 		rallyServer.setPassword(parsedCmdLine.getOptionValue(PASSWORD_KEY));
 		

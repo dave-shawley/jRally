@@ -28,7 +28,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
@@ -469,7 +469,7 @@ public class ServerConnection
 		throws ClientProtocolException, IOException, UnexpectedResponseException
 	{
 		logger.debug(String.format("retrieving %s from %s", klass.toString(), uri.toString()));
-		HttpGet get = new HttpGet(uri);
+		HttpUriRequest get = clientFactory.getRequestObject("GET", uri);
 		AbstractHttpClient httpClient = clientFactory.getHttpClient(this);
 		HttpResponse response = httpClient.execute(host, get);
 		StatusLine status = response.getStatusLine();
