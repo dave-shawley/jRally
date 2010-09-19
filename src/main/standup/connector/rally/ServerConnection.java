@@ -402,6 +402,31 @@ public class ServerConnection
 		setPassword(credentials.getPassword());
 	}
 
+	/* (non-Javadoc)
+	 * @see standup.connector.ServerConnection#retrieveURI(java.lang.Class, java.net.URI)
+	 */
+	@Override
+	public <T> T retrieveURI(Class<T> klass, URI uri)
+		throws ClientProtocolException, IOException, UnexpectedResponseException
+	{
+		JAXBElement<T> jaxbElm = retrieveJAXBElement(klass, uri);
+		return jaxbElm.getValue();
+	}
+
+	/* (non-Javadoc)
+	 * @see standup.connector.ServerConnection#login()
+	 */
+	@Override
+	public boolean login() throws ClientProtocolException, IOException {
+		try {
+			doSimpleQuery("user", "UserName", getUsername());
+			return true;
+		} catch (UnexpectedResponseException e) {
+			logger.error("simple query failed, assuming a login failure", e);
+		}
+		return false;
+	}
+
 	//=========================================================================
 	// Internal utility methods
 	//
@@ -480,19 +505,13 @@ public class ServerConnection
 		}
 	}
 
-	QueryResultType doSimpleQuery(String objectType, String attributeName, String attributeValue) throws ClientProtocolException, UnexpectedResponseException, MalformedURLException, IOException {
+	QueryResultType doSimpleQuery(String objectType, String attributeName, String attributeValue)
+		throws ClientProtocolException, UnexpectedResponseException, MalformedURLException, IOException
+	{
 		return retrieveURI(QueryResultType.class,
 				           buildQuery(objectType, "AND",
 				        		     String.format("%s = \"%s\"",
 				        		    		       attributeName, attributeValue)));
-	}
-
-	@Override
-	public <T> T retrieveURI(Class<T> klass, URI uri)
-		throws ClientProtocolException, IOException, UnexpectedResponseException
-	{
-		JAXBElement<T> jaxbElm = retrieveJAXBElement(klass, uri);
-		return jaxbElm.getValue();
 	}
 
 	<T> JAXBElement<T> retrieveJAXBElement(Class<T> klass, URI uri)

@@ -23,12 +23,16 @@
 				<h:inputSecret id="password" value="#{connectionBean.password}" redisplay="false"
 					validator="#{connectionBean.validateString}"/>
 				<h:message for="password"/>
-				
+
 				<br/>
 				<br/>
 				<h:commandButton id="login" value="Login" action="#{connectionBean.loginAction}"/>
+
 			</h:panelGrid>
 		</h:form>
+		<h:messages
+			globalOnly="true"
+			showSummary="true" showDetail="true"/>
 	</body>
 
 </html>

@@ -140,4 +140,15 @@ public interface ServerConnection {
 		throws ClientProtocolException, IOException, TransformerException,
 		       UnexpectedResponseException;
 
+	/**
+	 * Attempts a simple query to verify that the user credentials are correct.
+	 *  
+	 * @return true if the login succeeded, false otherwise
+	 * @throws ClientProtocolException
+	 *         thrown if retrieving the resource results in an HTTP error
+	 * @throws IOException
+	 *         thrown if a network error occurs while retrieving the resource
+	 */
+	public boolean login() throws ClientProtocolException, IOException;
+
 }

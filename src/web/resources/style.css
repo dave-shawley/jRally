@@ -1,0 +1,39 @@
+div#menu {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 15%;
+	height: 100%;
+	border: 1pt solid red;
+	font-size: small;
+	font-family: sans-serif;
+	font-style: italic;
+	background: rgb(176,224,230); /* X11 PowderBlue */
+}
+.menu-item {
+	padding-left: 1em;
+}
+.menu-item:hover {
+	border: 0.5pt solid rgb(47,79,79); /* X11 DarkSlateGray */
+	background: rgb(70,130,180); /* X11 SteelBlue */
+	color: white;
+	font-weight: bold;
+}
+div#main {
+	position: absolute;
+	top: 0;
+	left: 15%;
+	height: 100%;
+	width: 85%;
+	border: 1pt dashed blue;
+}
+div#title {
+	font-family: serif;
+	font-size: x-large;
+	font-weight: bold;
+	text-align: center;
+	padding: 5pt;
+}
+div#content {
+	padding-left: 1em;
+}

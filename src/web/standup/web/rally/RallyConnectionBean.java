@@ -1,6 +1,8 @@
 package standup.web.rally;
 
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -40,7 +42,28 @@ public class RallyConnectionBean
 	}
 
 	public String loginAction() {
-		return "success";
+		Exception caughtExc = null;
+		try {
+			if (this.login()) {
+				return "success";
+			}
+		} catch (Exception e) {
+			logger.error("login attempt failed: "+e.getMessage(), e);
+			caughtExc = e;
+		}
+
+		FacesContext fc = FacesContext.getCurrentInstance();
+		FacesMessage msg = new FacesMessage();
+		msg.setSeverity(FacesMessage.SEVERITY_ERROR);
+		msg.setSummary("Login failed");
+		if (caughtExc != null) {
+			StringWriter sw = new StringWriter();
+			caughtExc.printStackTrace(new PrintWriter(sw));
+			msg.setDetail(sw.toString());
+		}
+		fc.addMessage(null, msg);
+
+		return "failure";
 	}
 
 }
