@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+	                    http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+	<context-param><!-- forces Faces framework to generate debugging goodies -->
+		<param-name>javax.faces.PROJECT_STAGE</param-name>
+		<param-value>Development</param-value>
+	</context-param>
+	<context-param><!-- tell Faces to store view state on the server -->
+		<param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+		<param-value>server</param-value>
+	</context-param>
+
+	<servlet>
+		<display-name>Rally User Stories</display-name>
+		<servlet-name>RallyStoryServlet</servlet-name>
+		<servlet-class>standup.web.rally.RallyStoryServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet>
+		<display-name>Rally Login</display-name>
+		<servlet-name>RallyLoginServlet</servlet-name>
+		<servlet-class>standup.web.rally.RallyLoginServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<display-name>Faces Glue</display-name>
+		<servlet-name>FacesServlet</servlet-name>
+		<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>RallyStoryServlet</servlet-name>
+		<url-pattern>/story/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>FacesServlet</servlet-name>
+		<url-pattern>/login.xhtml</url-pattern>
+	</servlet-mapping>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Rally REST API</web-resource-name>
+			<url-pattern>/login.xhtml</url-pattern>
+			<http-method>GET</http-method>
+			<http-method>POST</http-method>
+		</web-resource-collection>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+
+</web-app>

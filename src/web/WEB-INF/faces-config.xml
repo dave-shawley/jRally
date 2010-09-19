@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config version="2.0"
+	xmlns="http://java.sun.com/xml/ns/javaee">
+
+	<!-- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee file:../schemas/web-facesconfig_2_0.xsd" -->
+
+	<managed-bean>
+		<managed-bean-name>connectionBean</managed-bean-name>
+		<managed-bean-class>standup.web.rally.RallyConnectionBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<navigation-rule>
+		<from-view-id>/login.xhtml</from-view-id>
+		<navigation-case>
+			<from-action>#{connectionBean.loginAction}</from-action>
+			<from-outcome>success</from-outcome>
+			<to-view-id>/projects.xhtml</to-view-id>
+		</navigation-case>
+		<navigation-case>
+			<from-action>#{connectionBean.loginAction}</from-action>
+			<from-outcome>failure</from-outcome>
+			<to-view-id>/login.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+</faces-config>

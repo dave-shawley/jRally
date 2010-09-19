@@ -1,6 +1,7 @@
 package standup.connector.rally;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -34,6 +35,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 import standup.connector.ConnectorException;
+import standup.connector.DefaultHttpClientFactory;
 import standup.connector.HttpClientFactory;
 import standup.connector.UnexpectedResponseException;
 import standup.utility.Utilities;
@@ -61,11 +63,16 @@ import com.rallydev.xml.TaskType;
  */
 public class ServerConnection
 	implements standup.connector.ServerConnection,
-	           org.apache.http.client.CredentialsProvider
+	           org.apache.http.client.CredentialsProvider,
+	           Serializable
 {
-	private static final String RALLY_QUERY_REL = "Rally Query";
-	private static final String RALLY_PARENT_URL_REL = "Parent URL";
-	private static final String RALLY_OBJECT_URL_REL = "Object URL";
+	private static final long serialVersionUID = -4302496608447788915L;
+
+	static final String RALLY_SERVER_NAME = "rally1.rallydev.com";
+	static final String RALLY_QUERY_REL = "Rally Query";
+	static final String RALLY_PARENT_URL_REL = "Parent URL";
+	static final String RALLY_OBJECT_URL_REL = "Object URL";
+
 	private static final Logger logger = Logger.getLogger(ServerConnection.class);
 	private static final Pattern ltPattern = Pattern.compile("&lt;");
 	private static final Pattern gtPattern = Pattern.compile("&gt;");
@@ -76,12 +83,21 @@ public class ServerConnection
 
 	private String userName;
 	private String password;
-	private final HttpHost host;
+	private HttpHost host;
 	private final HttpClientFactory clientFactory;
 	private JAXBContext jaxb;
 	private Unmarshaller unmarshaller;
 	private final TransformerFactory xformFactory;
 	private final standup.xml.ObjectFactory standupFactory;
+
+	/**
+	 * Creates a server connection using the default Rally server instance
+	 * and a {@link DefaultHttpClientFactory} instance.
+	 */
+	public ServerConnection() {
+		this(RALLY_SERVER_NAME, new DefaultHttpClientFactory());
+		logger.info("created defaulted connection");
+	}
 
 	/**
 	 * Creates a server connection that connects to a specific Rally server.
@@ -92,8 +108,9 @@ public class ServerConnection
 	 * @throws Error when the JAXB context cannot be created.  The underlying
 	 *         {@link JAXBException} is attached as the cause.
 	 */
-	public ServerConnection(String serverName, HttpClientFactory clientFactory)
-	{
+	public ServerConnection(String serverName, HttpClientFactory clientFactory) {
+		logger.info(String.format("initializing serverName=%s factory=%s",
+				serverName, clientFactory.toString()));
 		this.userName = "";
 		this.password = "";
 		this.host = new HttpHost(serverName, 443, "https");
@@ -332,6 +349,9 @@ public class ServerConnection
 	public void setUsername(String userName) {
 		this.userName = userName;
 	}
+	public String getUsername() {
+		return userName;
+	}
 
 	/**
 	 * Stores the password that is sent to the server in response to
@@ -341,6 +361,16 @@ public class ServerConnection
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	public String getPassword() {
+		return password;
+	}
+
+	public void setServerName(String serverName) {
+		this.host = new HttpHost(serverName, 443, "https");
+	}
+	public String getServerName() {
+		return this.host.getHostName();
 	}
 
 	//=========================================================================

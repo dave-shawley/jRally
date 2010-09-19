@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<html
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+	<head><title>Rally Login</title></head>
+	<body>
+		<h:form>
+			<h:panelGrid columns="3">
+				<h:outputLabel for="serverName" value="Server:"/>
+				<h:inputText id="serverName" value="#{connectionBean.serverName}"
+					validator="#{connectionBean.validateString}"/>
+				<h:message for="serverName"/>
+				
+				<h:outputLabel for="userName" value="User Name:"/>
+				<h:inputText id="userName" value="#{connectionBean.username}"
+					validator="#{connectionBean.validateString}"/>
+				<h:message for="userName"/>
+				
+				<h:outputLabel for="password" value="Password:"/>
+				<h:inputSecret id="password" value="#{connectionBean.password}" redisplay="false"
+					validator="#{connectionBean.validateString}"/>
+				<h:message for="password"/>
+				
+				<br/>
+				<br/>
+				<h:commandButton id="login" value="Login" action="#{connectionBean.loginAction}"/>
+			</h:panelGrid>
+		</h:form>
+	</body>
+
+</html>

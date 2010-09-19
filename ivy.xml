@@ -68,6 +68,16 @@
 			rev="1.7"
 			conf="*->minimal"/>
 
+		<dependency
+			org="javax.servlet"
+			name="servletapi"
+			rev="2.4"/>
+
+		<dependency
+			org="javax.faces"
+			name="jsf-api"
+			rev="2.0"/>
+
 	</dependencies>
 </ivy-module>
 

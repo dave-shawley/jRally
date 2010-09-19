@@ -15,8 +15,10 @@
 	-->
 	<property name="src.dir" location="src/main"/>
 	<property name="test.src.dir" location="src/test"/>
-	<property name="generated.src.dir" location="generated-src"/>
+	<property name="web.src.dir" location="src/web"/>
 	<property name="config.dir" location="configs"/>
+	<property name="web.rsrc.dir" value="${web.src.dir}/resources"/>
+	<property name="generated.src.dir" location="generated-src"/>
 	<property name="lib.dir" location="local-lib"/>
 	<property name="ivy.lib.dir" location="ext-lib"/>
 	<property name="tools.dir" location="tools"/>
@@ -37,7 +39,6 @@
 	<property name="classes.dir" value="${build.dir}/classes"/>
 	<property name="test.classes.dir" value="${build.dir}/test-classes"/>
 	<property name="eclipse.build.dir" value="build/eclipse"/> <!-- this is required to be relative -->
-	<property name="war.dir" value="${build.dir}/war"/>
 	<property name="coverage.dir" value="${build.dir}/coverage"/>
 	<!-- This is not defined here, read the comments above the "emma" target -->
 	<!-- property name="instr.classes.dir" value="${build.dir}/instr"/ -->
@@ -80,6 +81,7 @@
 	<path id="run.classpath">
 		<path refid="default.classpath"/>
 		<fileset dir="${output.dir}" includes="**/*.jar"/>
+		<pathelement location="${config.dir}/test"/>
 	</path>
 
 
@@ -159,12 +161,18 @@
 			<classpath>
 				<output path="${eclipse.build.dir}/classes"/>
 				<source path="${src.dir}"/>
+				<source path="${web.src.dir}" output="${eclipse.build.dir}/web"/>
 				<source path="${test.src.dir}" output="${eclipse.build.dir}/tests"/>
 				<source path="${generated.src.dir}" output="${eclipse.build.dir}/generated"/>
-				<library path="ext-lib/jdom-1.1.1.jar"
-					javadoc="http://www.jdom.org/docs/apidocs/"/>
 				<library pathref="default.classpath"/>
-				<library path="${config.dir}"/>
+				<library path="${config.dir}/main"/>
+				<library path="${config.dir}/test"/>
+				<library path="ext-lib/httpclient-4.0.1.jar"
+					source="/Users/daveshawley/src/apache.org/httpcommon-4.0.1/src"
+					javadoc="/Users/daveshawley/src/apache.org/httpcommon-4.0.1/api"/>
+				<library path="ext-lib/httpcore-4.0.1.jar"
+					source="/Users/daveshawley/src/apache.org/httpcommon-4.0.1/src"
+					javadoc="/Users/daveshawley/src/apache.org/httpcommon-4.0.1/api"/>
 			</classpath>
 		</eclipse>
 	</target>
@@ -176,6 +184,7 @@
 		<javac target="1.6" debug="true"
 			destdir="${classes.dir}" includeantruntime="false">
 			<src path="${src.dir}"/>
+			<src path="${web.src.dir}"/>
 			<src path="${generated.src.dir}"/>
 			<classpath refid="build.classpath"/>
 		</javac>
@@ -185,11 +194,27 @@
 		description="===> build a JAR of all classes"
 		depends="compile">
 		<jar destfile="${jar.path}" basedir="${classes.dir}">
-			<fileset dir="${classes.dir}" includes="**/*.class"/>
-			<fileset dir="${config.dir}" includes="*.properties"/>
+			<fileset dir="${classes.dir}" includes="**/*.class" excludes="**/web/**/*.class"/>
+			<fileset dir="${config.dir}/main" includes="*.properties"/>
 			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
 			<zipfileset dir="${xsl.dir}" prefix="xslt"/>
 		</jar>
+	</target>
+
+	<target name="war"
+		description="===> build a WAR of classes and their dependencies"
+		depends="compile">
+		<war destfile="${war.path}">
+			<webinf dir="${web.src.dir}/WEB-INF"/>
+			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
+			<zipfileset dir="${xsl.dir}" prefix="xslt"/>
+			<zipfileset dir="${web.rsrc.dir}"/>
+			<classes dir="${classes.dir}"/>
+			<classes dir="${config.dir}/main" includes="*.properties"/>
+			<classes dir="${config.dir}/web" includes="*.properties"/>
+			<lib dir="${lib.dir}"/>
+			<lib dir="${ivy.lib.dir}"/>
+		</war>
 	</target>
 
 	<target name="compile-tests"
@@ -209,6 +234,7 @@
 		depends="compile-tests">
 		<jar destfile="${test.jar.path}" basedir="${test.classes.dir}">
 			<fileset dir="${test.classes.dir}" includes="**/*.class"/>
+			<fileset dir="${config.dir}/test" includes="*.properties"/>
 			<zipfileset dir="${test.src.dir}/test-data" prefix="test-data"/>
 		</jar>
 	</target>
