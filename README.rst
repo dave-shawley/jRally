@@ -116,68 +116,94 @@ mention that I seem to have chosen a handful of technologies that don't seem
 to be used together very often.  So as any good programmer would do, I gone
 off and created something of my own.  At least I am going to describe it here.
 
-  +------------------------+-----------------------------------------------+
-  | README.rst             | Used by github_ as the overview documentation |
-  |                        | for the project.  I convert this to html and  |
-  |                        | store it in the *docs* directory so that      |
-  |                        | people who are not familiar with reStructured |
-  |                        | Text can read it easily.                      |
-  +------------------------+-----------------------------------------------+
-  | build.xml              | Ant build script                              |
-  +------------------------+-----------------------------------------------+
-  | configs/               |                                               |
-  +------------------------+-----------------------------------------------+
-  | docs/                  | Root of various documentation both generated  |
-  |                        | and static.                                   |
-  +------------------------+-----------------------------------------------+
-  | docs/overview.html     | HTML file that is used as the overview file   |
-  |                        | in the Javadoc when it is generated.          |
-  +------------------------+-----------------------------------------------+
-  | docs/README.html       | *README.rst* converted into HTML              |
-  +------------------------+-----------------------------------------------+
-  | ext-lib/               | External libraries imported by Ivy are stored |
-  |                        | here.  This directory is empty by default.    |
-  +------------------------+-----------------------------------------------+
-  | ivy.xml                | Ivy description of this projects dependencies |
-  +------------------------+-----------------------------------------------+
-  | ivysettings.xml        | Ivy configuration of repositories that it can |
-  |                        | pull dependencies from.                       |
-  +------------------------+-----------------------------------------------+
-  | local-lib/             | Libraries used by the project at runtime that |
-  |                        | are not easy to find via Ivy.                 |
-  +------------------------+-----------------------------------------------+
-  | src/                   | Root of all source code. I put everything in  |
-  |                        | subdirectories of this tree.                  |
-  +------------------------+-----------------------------------------------+
-  | src/main/              | Source code that goes into the main JAR file. |
-  |                        | This is where the meat of the application is. |
-  |                        | Other directories contain application hooks   |
-  |                        | and other extensions of the base code.        |
-  +------------------------+-----------------------------------------------+
-  | src/main/schemas/      | XSD files that describe the Rally API that is |
-  |                        | used along with the intermediate XML          |
-  |                        | representation.                               |
-  +------------------------+-----------------------------------------------+
-  | src/main/xslt/         | XSL transforms that create the intermediate   |
-  |                        | XML based on the Rally responses as well as   |
-  |                        | generate XSL-FO output from the intermediate. |
-  +------------------------+-----------------------------------------------+
-  | src/test/              | *JUnit tests.*  This subtree mimics the other |
-  |                        | trees so that test code resides in the same   |
-  |                        | package as the code that it is testing.  This |
-  |                        | makes it possible to test non-public members  |
-  |                        | by giving them package visibility.            |
-  +------------------------+-----------------------------------------------+
-  | src/test/test-data/    | XML files that are used as canned-responses   |
-  |                        | for the JUnit tests.                          |
-  +------------------------+-----------------------------------------------+
-  | tools/                 | Utilities used during the build process.      |
-  |                        | Most of the tools are not used at runtime.    |
-  |                        | One exception is the JAXB jars.  The XJC task |
-  |                        | is used to convert XSDs in the source tree    |
-  |                        | into Java classes.  They are also required at |
-  |                        | runtime.                                      |
-  +------------------------+-----------------------------------------------+
+  +------------------------+-------------------------------------------------+
+  | README.rst             | Used by github_ as the overview documentation   |
+  |                        | for the project.  I convert this to html and    |
+  |                        | store it in the *docs* directory so that        |
+  |                        | people who are not familiar with reStructured   |
+  |                        | Text can read it easily.                        |
+  +------------------------+-------------------------------------------------+
+  | build.xml              | Ant build script                                |
+  +------------------------+-------------------------------------------------+
+  | configs/               | Property files and other runtime configuration. |
+  |                        | *\*.properties* files are copied into the       |
+  |                        | appropriate place for the various deployment    |
+  |                        | artifacts.                                      |
+  +------------------------+-------------------------------------------------+
+  | configs/main/          | Property files in this directory serve as the   |
+  |                        | basis for all of the deployment artifacts.      |
+  |                        | They are copied into root of the main and test  |
+  |                        | JARs.  They are also copied into the            |
+  |                        | *WEB-INF/classes* directory of the WAR file.    |
+  +------------------------+-------------------------------------------------+
+  | configs/test/          | Property files in this directory are copied     |
+  |                        | into the root of the test JAR.  These files     |
+  |                        | will overwrite the files from *configs/main*.   |
+  +------------------------+-------------------------------------------------+
+  | configs/web/           | Property files in this directory are copied     |
+  |                        | into *WEB-INF/classes* of the WAR.  These files |
+  |                        | will overwrite the files from *configs/main*.   |
+  +------------------------+-------------------------------------------------+
+  | docs/                  | Root of various documentation both generated    |
+  |                        | and static.                                     |
+  +------------------------+-------------------------------------------------+
+  | docs/overview.html     | HTML file that is used as the overview file     |
+  |                        | in the Javadoc when it is generated.            |
+  +------------------------+-------------------------------------------------+
+  | docs/README.html       | *README.rst* converted into HTML                |
+  +------------------------+-------------------------------------------------+
+  | ext-lib/               | External libraries imported by Ivy are stored   |
+  |                        | here.  This directory is empty by default.      |
+  +------------------------+-------------------------------------------------+
+  | ivy.xml                | Ivy description of this projects dependencies   |
+  +------------------------+-------------------------------------------------+
+  | ivysettings.xml        | Ivy configuration of repositories that it can   |
+  |                        | pull dependencies from.                         |
+  +------------------------+-------------------------------------------------+
+  | local-lib/             | Libraries used by the project at runtime that   |
+  |                        | are not easy to find via Ivy.                   |
+  +------------------------+-------------------------------------------------+
+  | src/                   | Root of all source code. I put everything in    |
+  |                        | subdirectories of this tree.                    |
+  +------------------------+-------------------------------------------------+
+  | src/main/              | Source code that goes into the main JAR file.   |
+  |                        | This is where the meat of the application is.   |
+  |                        | Other directories contain application hooks     |
+  |                        | and other extensions of the base code.          |
+  +------------------------+-------------------------------------------------+
+  | src/main/schemas/      | XSD files that describe the Rally API that is   |
+  |                        | used along with the intermediate XML            |
+  |                        | representation.                                 |
+  +------------------------+-------------------------------------------------+
+  | src/main/xslt/         | XSL transforms that create the intermediate     |
+  |                        | XML based on the Rally responses as well as     |
+  |                        | generate XSL-FO output from the intermediate.   |
+  +------------------------+-------------------------------------------------+
+  | src/test/              | *JUnit tests.*  This subtree mimics the other   |
+  |                        | trees so that test code resides in the same     |
+  |                        | package as the code that it is testing.  This   |
+  |                        | makes it possible to test non-public members    |
+  |                        | by giving them package visibility.              |
+  +------------------------+-------------------------------------------------+
+  | src/test/test-data/    | XML files that are used as canned-responses     |
+  |                        | for the JUnit tests.                            |
+  +------------------------+-------------------------------------------------+
+  | src/web/               | *Web Frontend.*  This subtree contains the      |
+  |                        | JavaServer Faces and Servlet code that          |
+  |                        | implements the web application.                 |
+  +------------------------+-------------------------------------------------+
+  | src/web/resources/     | Web pages, stylesheets, and other artifacts     |
+  |                        | that are used for the web application.          |
+  +------------------------+-------------------------------------------------+
+  | src/web/WEB-INF/       | Deployment descriptors for the web application. |
+  +------------------------+-------------------------------------------------+
+  | tools/                 | Utilities used during the build process.        |
+  |                        | Most of the tools are not used at runtime.      |
+  |                        | One exception is the JAXB jars.  The XJC task   |
+  |                        | is used to convert XSDs in the source tree      |
+  |                        | into Java classes.  They are also required at   |
+  |                        | runtime.                                        |
+  +------------------------+-------------------------------------------------+
 
 .. _Rally: http://www.rallydev.com/
 .. _git: http://gitscm.org/

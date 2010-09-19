@@ -413,8 +413,8 @@ off and created something of my own.  At least I am going to describe it here.</
 <blockquote>
 <table border="1" class="docutils">
 <colgroup>
-<col width="34%" />
-<col width="66%" />
+<col width="33%" />
+<col width="67%" />
 </colgroup>
 <tbody valign="top">
 <tr><td>README.rst</td>
@@ -428,7 +428,27 @@ Text can read it easily.</td>
 <td>Ant build script</td>
 </tr>
 <tr><td>configs/</td>
-<td>&nbsp;</td>
+<td>Property files and other runtime configuration.
+<em>*.properties</em> files are copied into the
+appropriate place for the various deployment
+artifacts.</td>
+</tr>
+<tr><td>configs/main/</td>
+<td>Property files in this directory serve as the
+basis for all of the deployment artifacts.
+They are copied into root of the main and test
+JARs.  They are also copied into the
+<em>WEB-INF/classes</em> directory of the WAR file.</td>
+</tr>
+<tr><td>configs/test/</td>
+<td>Property files in this directory are copied
+into the root of the test JAR.  These files
+will overwrite the files from <em>configs/main</em>.</td>
+</tr>
+<tr><td>configs/web/</td>
+<td>Property files in this directory are copied
+into <em>WEB-INF/classes</em> of the WAR.  These files
+will overwrite the files from <em>configs/main</em>.</td>
 </tr>
 <tr><td>docs/</td>
 <td>Root of various documentation both generated
@@ -486,6 +506,18 @@ by giving them package visibility.</td>
 <tr><td>src/test/test-data/</td>
 <td>XML files that are used as canned-responses
 for the JUnit tests.</td>
+</tr>
+<tr><td>src/web/</td>
+<td><em>Web Frontend.</em>  This subtree contains the
+JavaServer Faces and Servlet code that
+implements the web application.</td>
+</tr>
+<tr><td>src/web/resources/</td>
+<td>Web pages, stylesheets, and other artifacts
+that are used for the web application.</td>
+</tr>
+<tr><td>src/web/WEB-INF/</td>
+<td>Deployment descriptors for the web application.</td>
 </tr>
 <tr><td>tools/</td>
 <td>Utilities used during the build process.
