@@ -16,7 +16,7 @@
 		<navigation-case>
 			<from-action>#{connectionBean.loginAction}</from-action>
 			<from-outcome>success</from-outcome>
-			<to-view-id>/main.xhtml</to-view-id>
+			<to-view-id>/frames.xhtml</to-view-id>
 		</navigation-case>
 		<navigation-case>
 			<from-action>#{connectionBean.loginAction}</from-action>
@@ -24,5 +24,19 @@
 			<to-view-id>/login.xhtml</to-view-id>
 		</navigation-case>
 	</navigation-rule>
+
+	<!--navigation-rule>
+		<from-view-id>/menu.xhtml</from-view-id>
+		<navigation-case>
+			<from-action>#{connectionBean.returnSuccess}</from-action>
+			<from-outcome>success</from-outcome>
+			<to-view-id>/projects.xhtml</to-view-id>
+		</navigation-case>
+		<navigation-case>
+			<from-action>#{connectionBean.returnFailure}</from-action>
+			<from-outcome>failure</from-outcome>
+			<to-view-id>/main.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule-->
 
 </faces-config>
