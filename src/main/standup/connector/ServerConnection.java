@@ -34,11 +34,31 @@ public interface ServerConnection {
  	 * Retrieves the list of iterations for a specific project.
  	 * @param projectName the project to retrieve the information for.
  	 * @return The list of known iterations.
+ 	 * 
+ 	 * @throws IOException when a low-level IO operation fails
+ 	 * @throws ClientProtocolException when an error occurs in the protocol
+ 	 *         layer - e.g., a non-successful HTTP result code is returned 
+ 	 * @throws ConnectorException when an error occurs in the connector
+ 	 *         layer other than either a transport or IO layer failure
  	 */
  	public List<IterationStatus> listIterationsForProject(String projectName)
  		throws IOException, JAXBException, ClientProtocolException,
  		       ConnectorException;
- 	
+
+ 	/**
+ 	 * Retrieves the list of iterations that a user is involved in.
+ 	 * @param userName the user to search for.
+ 	 * @return The list of iterations that the user is associated with.
+ 	 *
+ 	 * @throws IOException when a low-level IO operation fails
+ 	 * @throws ClientProtocolException when an error occurs in the protocol
+ 	 *         layer - e.g., a non-successful HTTP result code is returned 
+ 	 * @throws ConnectorException when an error occurs in the connector
+ 	 *         layer other than either a transport or IO layer failure
+ 	 */
+ 	public List<IterationStatus> listIterationsInvolvingUser(String userName)
+		throws IOException, ClientProtocolException, ConnectorException;
+
  	/**
  	 * Retrieve a list of stories for a named iteration.
  	 * 

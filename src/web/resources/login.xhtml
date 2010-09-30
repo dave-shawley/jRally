@@ -11,17 +11,17 @@
 			<h:panelGrid columns="3">
 				<h:outputLabel for="serverName" value="Server:"/>
 				<h:inputText id="serverName" value="#{connectionBean.serverName}"
-					validator="#{connectionBean.validateString}"/>
+					validator="#{connectionBean.requireNonEmptyString}"/>
 				<h:message for="serverName"/>
 				
 				<h:outputLabel for="userName" value="User Name:"/>
 				<h:inputText id="userName" value="#{connectionBean.username}"
-					validator="#{connectionBean.validateString}"/>
+					validator="#{connectionBean.requireNonEmptyString}"/>
 				<h:message for="userName"/>
 				
 				<h:outputLabel for="password" value="Password:"/>
 				<h:inputSecret id="password" value="#{connectionBean.password}" redisplay="false"
-					validator="#{connectionBean.validateString}"/>
+					validator="#{connectionBean.requireNonEmptyString}"/>
 				<h:message for="password"/>
 
 				<br/>

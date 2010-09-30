@@ -130,25 +130,19 @@ public class ServerConnection
 	 */
 	@Override
 	public List<IterationStatus> listIterationsForProject(String project)
-		throws IOException, ClientProtocolException, ConnectorException, JAXBException
+		throws IOException, ClientProtocolException, ConnectorException
 	{
-		QueryResultType result = doSimpleQuery("iteration", "Project.Name", project);
-		ArrayList<IterationStatus> iterations = new ArrayList<IterationStatus>(
-				Math.min(result.getPageSize().intValue(),
-						 result.getTotalResultCount().intValue()));
-		for (DomainObjectType domainObj : result.getResults().getObject()) {
-			IterationStatus iterStatus = new IterationStatus();
-			iterStatus.iterationName = domainObj.getRefObjectName();
-			try {
-				iterStatus.iterationURI = new URI(domainObj.getRef());
-			} catch (URISyntaxException e) {
-				logger.error(String.format("iteration %s has invalid URI %s",
-						iterStatus.iterationName, domainObj.getRef()), e);
-				iterStatus.iterationURI = null;
-			}
-			iterations.add(iterStatus);
-		}
-		return iterations;
+		return retrieveIterationsByAttribute("Project.Name", project);
+	}
+
+	/* (non-Javadoc)
+	 * @see standup.connector.ServerConnection#listIterationsInvolvingUser(java.lang.String)
+	 */
+	@Override
+	public List<IterationStatus> listIterationsInvolvingUser(String userName)
+		throws IOException, ClientProtocolException, ConnectorException
+	{
+		return retrieveIterationsByAttribute("UserIterationCapacities.User.UserName", getUsername());
 	}
 
 	/**
@@ -544,6 +538,40 @@ public class ServerConnection
 					uri.toString(), status.getStatusCode(), status.getReasonPhrase());
 			throw new ClientProtocolException(msg);
 		}
+	}
+
+	/**
+	 * Retrieve an iteration list based on a simple attribute=value query.
+	 * 
+	 * @param attributeName the attribute to query by.
+	 * @param attributeValue the value of the attribute to match.
+	 * @return a list of {@link IterationStatus} instances for matching iterations.
+	 * 
+	 * @throws ClientProtocolException
+	 * @throws UnexpectedResponseException
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	private List<IterationStatus> retrieveIterationsByAttribute(String attributeName, String attributeValue)
+			throws ClientProtocolException, UnexpectedResponseException, MalformedURLException, IOException
+	{
+		QueryResultType result = doSimpleQuery("iteration", attributeName, attributeValue);
+		ArrayList<IterationStatus> iterations = new ArrayList<IterationStatus>(
+				Math.min(result.getPageSize().intValue(),
+						 result.getTotalResultCount().intValue()));
+		for (DomainObjectType domainObj : result.getResults().getObject()) {
+			IterationStatus iterStatus = new IterationStatus();
+			iterStatus.iterationName = domainObj.getRefObjectName();
+			try {
+				iterStatus.iterationURI = new URI(domainObj.getRef());
+			} catch (URISyntaxException e) {
+				logger.error(String.format("iteration %s has invalid URI %s",
+						iterStatus.iterationName, domainObj.getRef()), e);
+				iterStatus.iterationURI = null;
+			}
+			iterations.add(iterStatus);
+		}
+		return iterations;
 	}
 
 	<T,U> U transformResultInto(Class<U> klass, T result)

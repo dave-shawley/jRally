@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<head>
+		<meta http-equiv="Content-Type" content="text/xhtml; charset=UTF-8" />
+		<title>jRally Iterations</title>
+		<link href="style.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+		<h:form>
+			<h:panelGrid columns="3">
+				<h:outputLabel for="iterationName" value="Iteration Name:"/>
+				<h:inputText id="iterationName"
+					value="#{connectionBean.selectedIteration}"
+					validator="#{connectionBean.validateString}"/>
+				<h:message for="iterationName"/>
+				<h:commandButton value="Retrieve Iteration"
+					action="#{connectionBean.retrieveStoriesForNamedIteration}"/>
+			</h:panelGrid>
+			<i>OR <h:commandLink value="Select from a List of Iterations"
+			                     action="#{connectionBean.retrieveIterationsForCurrentUser}"/></i>
+		</h:form>
+	</body>
+</html>	

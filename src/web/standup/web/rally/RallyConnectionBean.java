@@ -3,6 +3,8 @@ package standup.web.rally;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -14,6 +16,7 @@ import javax.faces.context.FacesContext;
 import org.apache.log4j.Logger;
 
 import standup.connector.rally.ServerConnection;
+import standup.xml.StoryList;
 
 
 @ManagedBean
@@ -24,6 +27,9 @@ public class RallyConnectionBean
 {
 	private static final long serialVersionUID = 3954479674129797725L;
 	private static final Logger logger = Logger.getLogger(RallyConnectionBean.class);
+	private String selectedIteration = null;
+	private List<IterationStatus> iterations = null;
+	private final StoryList stories = null;
 
 	@Override
 	public String toString() {
@@ -32,7 +38,7 @@ public class RallyConnectionBean
 				getUsername(), getPassword());
 	}
 
-	public void validateString(FacesContext fc, UIComponent ui, Object objVal) {
+	public void requireNonEmptyString(FacesContext fc, UIComponent ui, Object objVal) {
 		String s = (String) objVal;
 		if (s == null || s.trim().isEmpty()) {
 			((UIInput)ui).setValid(false);
@@ -64,6 +70,35 @@ public class RallyConnectionBean
 		fc.addMessage(null, msg);
 
 		return "failure";
+	}
+
+	public String retrieveStoriesForNamedIteration(String iterationName) {
+		return "failure";
+	}
+
+	public String retrieveIterationsForCurrentUser() {
+		return "failure";
+	}
+
+	public String getSelectedIteration() {
+		return selectedIteration;
+	}
+
+	public void setSelectedIteration(String selectedIteration) {
+		this.selectedIteration = selectedIteration;
+	}
+
+	public List<IterationStatus> getIterations() {
+		synchronized(iterations) {
+			if (iterations == null) {
+				iterations = new ArrayList<IterationStatus>(0);
+			}
+		}
+		return iterations;
+	}
+
+	public List<?> getStoryList() {
+		return null;
 	}
 
 }
