@@ -11,6 +11,7 @@
 				it is usually pointless to go more than two deep.</xs:documentation>
 		</xs:annotation>
 		<xs:group ref="inline-elements" minOccurs="0" maxOccurs="unbounded"/>
+		<xs:anyAttribute/>
 	</xs:complexType>
 	<xs:group name="inline-elements">
 		<xs:annotation>
@@ -26,6 +27,7 @@
 			<xs:element name="i" type="inline-element"/>
 			<xs:element name="tt" type="inline-element"/>
 			<xs:element name="div" type="inline-element"/>
+			<xs:element name="font" type="inline-element"/>
 			<xs:element name="br"/>
 		</xs:choice>
 	</xs:group>
@@ -51,6 +53,7 @@
 						<xs:group ref="inline-elements" minOccurs="0" maxOccurs="unbounded"/>
 						<xs:group ref="block-elements" minOccurs="0" maxOccurs="unbounded"/>
 					</xs:choice>
+					<xs:anyAttribute/>
 				</xs:complexType>
 			</xs:element>
 		</xs:sequence>
@@ -71,6 +74,7 @@
 				</xs:annotation>
 				<xs:complexType mixed="true">
 					<xs:group ref="inline-elements" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:anyAttribute/>
 				</xs:complexType>
 			</xs:element>
 			<xs:element name="ul" type="simple-list"/>
@@ -80,10 +84,12 @@
 
 	<xs:complexType name="out-of-line-element" mixed="true">
 		<xs:group ref="inline-elements" minOccurs="0" maxOccurs="unbounded"/>
+		<xs:anyAttribute/>
 	</xs:complexType>
 
 	<xs:complexType name="formatting-element" mixed="true">
 		<xs:group ref="all-formatting-elements" minOccurs="0" maxOccurs="unbounded"/>
+		<xs:anyAttribute/>
 	</xs:complexType>
 
 	<xs:group name="all-formatting-elements">
@@ -96,6 +102,7 @@
 			<xs:element name="i" type="formatting-element"/>
 			<xs:element name="b" type="formatting-element"/>
 			<xs:element name="tt" type="formatting-element"/>
+			<xs:element name="font" type="formatting-element"/>
 		</xs:choice>
 	</xs:group>
 

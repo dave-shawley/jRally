@@ -24,6 +24,7 @@ import standup.xml.TaskType;
 
 
 public abstract class RetrieveStories {
+	protected static final String DEBUG_PREFIX_KEY = "debug-prefix";
 	protected static final String PASSWORD_KEY = "password";
 	protected static final String USER_KEY = "user";
 	protected static final String VERBOSE_KEY = "verbose";
@@ -34,6 +35,7 @@ public abstract class RetrieveStories {
 	private final static Logger logger = Logger.getLogger(RetrieveStories.class);
 	private String storyFilename = null;
 	private String taskFilename = null;
+	private String debugPrefix = null;
 
 	@SuppressWarnings("static-access")
 	protected Options buildOptions() {
@@ -46,36 +48,42 @@ public abstract class RetrieveStories {
 			OptionBuilder
 				.withLongOpt(HELP_KEY)
 				.withDescription("show this help summary")
-				.create("h"));
+				.create('h'));
 		options.addOption(
 			OptionBuilder
 				.withLongOpt(VERBOSE_KEY)
 				.withDescription("show debug diagnostics")
-				.create("v"));
+				.create('v'));
 		options.addOption(
 			OptionBuilder
 				.withLongOpt(USER_KEY)
 				.hasArg().withArgName("USER") //.isRequired()
 				.withDescription("connect to Rally with the user name USER")
-				.create("u"));
+				.create('u'));
 		options.addOption(
 			OptionBuilder
 				.withLongOpt(PASSWORD_KEY)
 				.hasArg().withArgName("PASSWORD") //.isRequired()
 				.withDescription("use this password when connecting to Rally")
-				.create("p"));
+				.create('p'));
 		options.addOption(
 				OptionBuilder
 					.withLongOpt(STORY_FILE_KEY)
 					.hasArg().withArgName("FILE")
 					.withDescription("use this name for the story cards PDF")
-					.create("s"));
+					.create('s'));
 		options.addOption(
 				OptionBuilder
 					.withLongOpt(TASK_FILE_KEY)
 					.hasArg().withArgName("FILE")
 					.withDescription("use this name for the task cards PDF")
-					.create("t"));
+					.create('t'));
+		options.addOption(
+				OptionBuilder
+					.withLongOpt(DEBUG_PREFIX_KEY)
+					.hasArg().withArgName("FILE")
+					.withDescription("use this as a name prefix for intermediate XML files")
+					.create('d'));
 		return options;
 	}
 
@@ -140,6 +148,9 @@ public abstract class RetrieveStories {
 			throw new MissingOptionException(String.format(
 				"one of %s or %s is required", STORY_FILE_KEY, TASK_FILE_KEY));
 		}
+
+		this.debugPrefix = parsedCmdLine.getOptionValue(DEBUG_PREFIX_KEY, null);
+
 		return true;
 	}
 
@@ -160,7 +171,7 @@ public abstract class RetrieveStories {
 			FileOutputStream fos;
 			fos = new FileOutputStream(pdfFilename);
 			Formatter formatter = new Formatter();
-			formatter.writeToPDF(stories, fos);
+			formatter.writeToPDF(stories, fos, debugPrefix);
 			fos.close();
 		} else {
 			logger.info(String.format("Found %d stories, no story file specified",
@@ -178,7 +189,7 @@ public abstract class RetrieveStories {
 					taskList.size(), pdfFilename));
 			FileOutputStream fos = new FileOutputStream(pdfFilename);
 			Formatter formatter = new Formatter();
-			formatter.writeToPDF(tasks, fos);
+			formatter.writeToPDF(tasks, fos, debugPrefix);
 			fos.close();
 		} else {
 			logger.info(String.format("found %d tasks, no task file specified",
@@ -198,6 +209,13 @@ public abstract class RetrieveStories {
 	 */
 	protected String getTaskFilename() {
 		return taskFilename;
+	}
+
+	/**
+	 * @return the debugPrefix
+	 */
+	protected String getDebugPrefix() {
+		return debugPrefix;
 	}
 
 }

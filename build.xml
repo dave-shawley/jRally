@@ -23,8 +23,8 @@
 	<property name="ivy.lib.dir" location="ext-lib"/>
 	<property name="tools.dir" location="tools"/>
 	<property name="docs.dir" location="docs"/>
-	<property name="schemas.dir" value="${src.dir}/schemas"/>
-	<property name="xsl.dir" value="${src.dir}/xslt"/>
+	<property name="schemas.dir" value="${config.dir}/main/schemas"/>
+	<property name="xsl.dir" value="${config.dir}/main/xslt"/>
 
 	<!--
 		This set of properties controls the locations of intermediate files.  These are used

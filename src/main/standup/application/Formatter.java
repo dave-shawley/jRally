@@ -1,11 +1,13 @@
 package standup.application;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.util.JAXBSource;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
@@ -32,23 +34,23 @@ public class Formatter {
 		jaxb = JAXBContext.newInstance("standup.xml");
 	}
 
-	private void dump(Object obj) {
-		/*
-		String fileName = String.format("xslt-input-%d.xml", obj.hashCode());
+	private void dump(Object obj, String dumpFilePrefix) {
+		String fileName = String.format("%s-%d.xml", dumpFilePrefix, obj.hashCode());
 		try {
 			Marshaller m = this.jaxb.createMarshaller();
 			m.marshal(obj, new File(fileName));
 		} catch (Exception e) {
 			logger.error("failed to write intermediate file "+fileName, e);
 		}
-		*/
 	}
 
-	public void writeToPDF(StoryList stories, FileOutputStream pdfFile) {
+	public void writeToPDF(StoryList stories, FileOutputStream pdfFile, String dumpFilePrefix) {
 		OutputStream outStream = new BufferedOutputStream(pdfFile);
 		Fop fop;
 		try {
-			dump(stories);
+			if (dumpFilePrefix != null) {
+				dump(stories, dumpFilePrefix);
+			}
 			fop = fopFactory.newFop(MimeConstants.MIME_PDF, outStream);
 			JAXBSource sourceDoc = new JAXBSource(this.jaxb, stories);
 			Utilities.runXSLT(new SAXResult(fop.getDefaultHandler()),
@@ -59,11 +61,13 @@ public class Formatter {
 		}
 	}
 
-	public void writeToPDF(TaskList tasks, FileOutputStream pdfFile) {
+	public void writeToPDF(TaskList tasks, FileOutputStream pdfFile, String dumpFilePrefix) {
 		OutputStream outStream = new BufferedOutputStream(pdfFile);
 		Fop fop;
 		try {
-			dump(tasks);
+			if (dumpFilePrefix != null) {
+				dump(tasks, dumpFilePrefix);
+			}
 			fop = fopFactory.newFop(MimeConstants.MIME_PDF, outStream);
 			JAXBSource sourceDoc = new JAXBSource(this.jaxb, tasks);
 			Utilities.runXSLT(new SAXResult(fop.getDefaultHandler()),

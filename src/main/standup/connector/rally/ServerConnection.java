@@ -80,6 +80,7 @@ public class ServerConnection
 	private static final Pattern nbspPattern = Pattern.compile("&nbsp;");
 	private static final Pattern brPattern = Pattern.compile("<br\\s*>");
 	private static final Pattern ampPattern2 = Pattern.compile("&");
+	private static final Pattern quotPattern = Pattern.compile("\"");
 
 	private String userName;
 	private String password;
@@ -603,6 +604,7 @@ public class ServerConnection
 		descString = ampPattern.matcher(descString).replaceAll("&");	// necessary to catch &nbsp;
 		descString = nbspPattern.matcher(descString).replaceAll(" ");	// &nbsp; -> " "
 		descString = brPattern.matcher(descString).replaceAll("<br/>");	// <br> -> <br/>
+		descString = quotPattern.matcher(descString).replaceAll("\"");	// &quot; -> "
 		descString = ampPattern2.matcher(descString).replaceAll("&amp;"); // & -> &amp;
 		descString = String.format("<description>%s</description>", descString);
 
