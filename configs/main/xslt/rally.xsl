@@ -36,7 +36,7 @@
 			<full-name><xsl:value-of select="$name"/></full-name>
 			<identifier><xsl:value-of select="FormattedID/text()"/></identifier>
 			<description/>
-			<owner><xsl:value-of select="Owner/text()"/></owner>
+			<owner><xsl:value-of select="Owner/@refObjectName"/></owner>
 			<estimate><xsl:value-of select="PlanEstimate/text()"/></estimate>
 			<state>
 				<xsl:choose>

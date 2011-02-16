@@ -167,12 +167,6 @@
 				<library pathref="default.classpath"/>
 				<library path="${config.dir}/main"/>
 				<library path="${config.dir}/test"/>
-				<library path="ext-lib/httpclient-4.0.1.jar"
-					source="/Users/daveshawley/src/apache.org/httpcommon-4.0.1/src"
-					javadoc="/Users/daveshawley/src/apache.org/httpcommon-4.0.1/api"/>
-				<library path="ext-lib/httpcore-4.0.1.jar"
-					source="/Users/daveshawley/src/apache.org/httpcommon-4.0.1/src"
-					javadoc="/Users/daveshawley/src/apache.org/httpcommon-4.0.1/api"/>
 			</classpath>
 		</eclipse>
 	</target>

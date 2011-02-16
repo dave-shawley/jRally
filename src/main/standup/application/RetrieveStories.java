@@ -1,6 +1,10 @@
 package standup.application;
 
+import java.io.BufferedReader;
+import java.io.Console;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -33,6 +37,8 @@ public abstract class RetrieveStories {
 	protected static final String STORY_FILE_KEY = "story-file";
 
 	private final static Logger logger = Logger.getLogger(RetrieveStories.class);
+	private String userName = null;
+	private String password = null;
 	private String storyFilename = null;
 	private String taskFilename = null;
 	private String debugPrefix = null;
@@ -107,8 +113,8 @@ public abstract class RetrieveStories {
 
 		ServerConnection rallyServer = new ServerConnection(
 				Constants.RALLY_SERVER_NAME, new RallyClientFactory());
-		rallyServer.setUsername(parsedCmdLine.getOptionValue(USER_KEY));
-		rallyServer.setPassword(parsedCmdLine.getOptionValue(PASSWORD_KEY));
+		rallyServer.setUsername(this.userName);
+		rallyServer.setPassword(this.password);
 		
 		StoryList stories = fetchStories(rallyServer);
 		processStories(stories);
@@ -126,6 +132,34 @@ public abstract class RetrieveStories {
 		String myName = this.getClass().getCanonicalName();
 		formatter.printHelp(myName + " [options] story-id...", opts);
 	}
+	
+	protected String retrieveOption(CommandLine parsedCmdLine, String optionKey,
+			boolean hideInput) throws MissingOptionException
+	{
+		String result = null;
+		if (parsedCmdLine.hasOption(optionKey)) {
+			result = parsedCmdLine.getOptionValue(optionKey);
+		} else if (System.console() != null) {
+			Console cons = System.console();
+			if (hideInput) {
+				char[] buf = cons.readPassword("%s: ", optionKey);
+				result = new String(buf);
+			} else {
+				result = cons.readLine("%s: ", optionKey);
+			}
+		} else {
+			logger.warn("failed to acquire system console, using System.in/out instead.");
+			System.out.print(optionKey+": ");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+			try {
+				result = reader.readLine();
+			} catch (IOException e) {
+				logger.error("failed to read input", e);
+				throw new MissingOptionException(String.format("--%s is a required option", optionKey));
+			}
+		}
+		return result.trim();
+	}
 
 	protected boolean processOptions(CommandLine parsedCmdLine) throws Exception {
 		if (parsedCmdLine.hasOption(HELP_KEY)) {
@@ -134,19 +168,18 @@ public abstract class RetrieveStories {
 		if (parsedCmdLine.hasOption(VERBOSE_KEY)) {
 			Logger.getRootLogger().setLevel(Level.DEBUG);
 		}
-		if (!parsedCmdLine.hasOption(USER_KEY)) {
-			throw new MissingOptionException("--user (-u) is a required option");
-		}
-		if (!parsedCmdLine.hasOption(PASSWORD_KEY)) {
-			throw new MissingOptionException(
-				"--password (-p) is a required option");
-		}
 
-		this.storyFilename = parsedCmdLine.getOptionValue(STORY_FILE_KEY, null);
-		this.taskFilename = parsedCmdLine.getOptionValue(TASK_FILE_KEY, null);
-		if (this.storyFilename == null && this.taskFilename == null) {
+		this.userName = retrieveOption(parsedCmdLine, USER_KEY, false);
+		this.password = retrieveOption(parsedCmdLine, PASSWORD_KEY, true);
+		this.storyFilename = retrieveOption(parsedCmdLine, STORY_FILE_KEY, false);
+		this.taskFilename = retrieveOption(parsedCmdLine, TASK_FILE_KEY, false);
+		if (this.userName.isEmpty() || this.password.isEmpty()) {
 			throw new MissingOptionException(String.format(
-				"one of %s or %s is required", STORY_FILE_KEY, TASK_FILE_KEY));
+					"both %s and %s are required", USER_KEY, PASSWORD_KEY));
+		}
+		if (this.storyFilename.isEmpty() && this.taskFilename.isEmpty()) {
+			throw new MissingOptionException(String.format(
+					"one of %s or %s is required", STORY_FILE_KEY, TASK_FILE_KEY));
 		}
 
 		this.debugPrefix = parsedCmdLine.getOptionValue(DEBUG_PREFIX_KEY, null);
@@ -201,6 +234,9 @@ public abstract class RetrieveStories {
 	 * @return the storyFilename
 	 */
 	protected String getStoryFilename() {
+		if (storyFilename.isEmpty()) {
+			return null;
+		}
 		return storyFilename;
 	}
 
@@ -208,6 +244,9 @@ public abstract class RetrieveStories {
 	 * @return the taskFilename
 	 */
 	protected String getTaskFilename() {
+		if (taskFilename.isEmpty()) {
+			return null;
+		}
 		return taskFilename;
 	}
 
