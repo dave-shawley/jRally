@@ -190,8 +190,8 @@
 		<jar destfile="${jar.path}" basedir="${classes.dir}">
 			<fileset dir="${classes.dir}" includes="**/*.class" excludes="**/web/**/*.class"/>
 			<fileset dir="${config.dir}/main" includes="*.properties"/>
-			<zipfileset dir="${schemas.dir}" prefix="schemas"/>
-			<zipfileset dir="${xsl.dir}" prefix="xslt"/>
+			<zipfileset dir="${schemas.dir}" prefix="schemas" includes="**/*.xsd"/>
+			<zipfileset dir="${xsl.dir}" prefix="xslt" includes="**/*.xsl"/>
 		</jar>
 	</target>
 

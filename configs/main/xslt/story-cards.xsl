@@ -146,6 +146,8 @@
 							<fo:table-cell>
 								<fo:block text-align="left" margin-left="1em">
 									<xsl:value-of select="parent-identifier/text()"/>
+									<xsl:text>/</xsl:text>
+									<xsl:value-of select="identifier/text()"/>
 								</fo:block>
 							</fo:table-cell>
 							<fo:table-cell>
